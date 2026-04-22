@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Any, Optional
 import uvicorn
@@ -7,14 +8,14 @@ import uvicorn
 from environment import CollapseNetEnv, TASK_IDS
 
 app = FastAPI(
-    title="CollapseNet v2 — Fleet AI Aligned Generational Degradation Watchdog",
+    title="CollapseNet v3 — Fleet AI Aligned Generational Degradation Watchdog",
     description=(
         "An RL environment aligned with the Fleet AI sub-theme. "
-        "3 domain-specific model agents (science, medicine, legal) collapse simultaneously. "
-        "A watchdog agent monitors all 3, detects hallucinations, tracks generational degradation, "
+        "3 domain-specific model agents (science, medicine, legal) collapse simultaneously with cross-agent contamination spread. "
+        "A watchdog agent monitors all 3, detects hallucinations, tracks generational degradation under time pressure, "
         "allocates limited retraining budget, and provides structured oversight explanations."
     ),
-    version="2.0.0",
+    version="3.0.0",
 )
 
 app.add_middleware(
@@ -45,13 +46,13 @@ class MCPRequest(BaseModel):
 @app.get("/")
 def root():
     return {
-        "name": "CollapseNet v2",
-        "version": "2.0.0",
+        "name": "CollapseNet v3",
+        "version": "3.0.0",
         "sub_theme": "Fleet AI — Scalable Oversight",
         "description": (
-            "3 domain AI agents collapse simultaneously across generations. "
+            "3 domain AI agents collapse simultaneously across generations with cross-agent contamination spread. "
             "A Fleet AI Watchdog monitors all 3, detects hallucinations, "
-            "tracks per-agent collapse trends, allocates retraining budget, "
+            "tracks per-agent collapse trends, allocates retraining budget under time pressure, "
             "and produces structured oversight explanations scored by Mercor reward scaling."
         ),
         "tasks": TASK_IDS,
@@ -59,6 +60,7 @@ def root():
         "endpoints": ["/reset", "/step", "/state", "/tasks", "/health", "/metadata", "/schema", "/mcp", "/docs"],
         "themes": [
             "Theme #1 — Fleet AI Sub-theme: Scalable Oversight across 3 simultaneous AI agents",
+            "Theme #1 — Cross-Agent Contamination: collapsed agents spread degradation to others",
             "Theme #4 — Self-Improvement: Watchdog improves collapse detection across generations",
             "Mercor Bonus: Reward scaling based on explanation quality and depth",
         ],
@@ -80,17 +82,30 @@ def health():
 @app.get("/metadata")
 def metadata():
     return {
-        "name": "CollapseNet v2",
+        "name": "CollapseNet v3",
+        "version": "3.0.0",
+        "sub_theme": "Fleet AI — Scalable Oversight",
         "description": (
-            "3 domain AI agents collapse simultaneously across generations. "
+            "3 domain AI agents collapse simultaneously across generations with cross-agent contamination spread. "
             "A Fleet AI Watchdog monitors all 3, detects hallucinations, "
-            "tracks per-agent collapse trends, allocates retraining budget, "
+            "tracks per-agent collapse trends, allocates retraining budget under time pressure, "
             "and produces structured oversight explanations scored by Mercor reward scaling."
         ),
-        "version": "2.0.0",
-        "sub_theme": "Fleet AI — Scalable Oversight",
         "tasks": TASK_IDS,
         "model_agents": ["science_model", "medicine_model", "legal_model"],
+        "themes": [
+            "Theme #1 — Fleet AI Sub-theme: Scalable Oversight across 3 simultaneous AI agents",
+            "Theme #1 — Cross-Agent Contamination: collapsed agents spread degradation to others",
+            "Theme #4 — Self-Improvement: Watchdog improves collapse detection across generations",
+            "Mercor Bonus: Reward scaling based on explanation quality and depth",
+        ],
+        "grader_dimensions": {
+            "hallucination_detection": "30% — 10% per agent",
+            "severity_assessment":     "20% — 6.7% per agent",
+            "collapse_trend_tracking": "15% — 5% per agent",
+            "retraining_allocation":   "20% — F1 score of budget decisions",
+            "explanation_quality":     "15% — Mercor reward scaling by depth and coverage",
+        },
     }
 
 
@@ -98,25 +113,14 @@ def metadata():
 def schema():
     return {
         "action": {
-            "watchdog_flags": {
+            "agent_assessments": {
                 "type": "dict",
-                "description": "Per-agent hallucination flags e.g. {science_model: true, medicine_model: false, legal_model: true}",
+                "description": "Per-agent assessment with is_hallucinated, severity_assessment, collapse_trend",
                 "keys": ["science_model", "medicine_model", "legal_model"]
             },
-            "severity_scores": {
-                "type": "dict",
-                "description": "Per-agent severity score 0.0-1.0 e.g. {science_model: 0.8}",
-                "keys": ["science_model", "medicine_model", "legal_model"]
-            },
-            "collapse_trends": {
-                "type": "dict",
-                "description": "Per-agent trend: stable, declining, critical",
-                "keys": ["science_model", "medicine_model", "legal_model"]
-            },
-            "retraining_budget": {
-                "type": "dict",
-                "description": "Budget allocation per agent e.g. {science_model: 1, medicine_model: 0, legal_model: 0}",
-                "keys": ["science_model", "medicine_model", "legal_model"]
+            "retrain_agents": {
+                "type": "list",
+                "description": "List of agent names to allocate retraining budget to e.g. ['science_model']",
             },
             "explanation": {
                 "type": "string",
@@ -125,17 +129,21 @@ def schema():
         },
         "observation": {
             "generation": {"type": "int", "description": "Current generation number"},
+            "total_generations": {"type": "int", "description": "Total generations in this episode"},
+            "steps_remaining": {"type": "int", "description": "Steps remaining before time pressure ends episode"},
             "agent_outputs": {"type": "dict", "description": "Output text from each agent this generation"},
             "collapse_indicators": {"type": "dict", "description": "Per-agent collapse signal strength 0.0-1.0"},
             "retraining_budget_remaining": {"type": "int", "description": "Retraining tokens left"},
-            "task_id": {"type": "string", "description": "Current task difficulty"}
+            "contamination_active": {"type": "bool", "description": "Whether cross-agent contamination is spreading"},
         },
         "state": {
-            "generation": {"type": "int", "description": "Current generation"},
+            "step": {"type": "int", "description": "Current step count"},
             "done": {"type": "bool", "description": "Whether episode is complete"},
-            "agents": {"type": "list", "description": "List of active agent names"},
-            "task_id": {"type": "string", "description": "Current task ID"},
-            "retraining_budget_remaining": {"type": "int", "description": "Tokens remaining"}
+            "difficulty": {"type": "string", "description": "Current task difficulty"},
+            "current_generation": {"type": "int", "description": "Current generation index"},
+            "steps_remaining": {"type": "int", "description": "Steps remaining before timeout"},
+            "retraining_budget_remaining": {"type": "int", "description": "Tokens remaining"},
+            "contamination_log": {"type": "list", "description": "Recent cross-agent contamination events"},
         }
     }
 
@@ -147,7 +155,7 @@ def mcp(req: MCPRequest):
         "id": req.id,
         "result": {
             "status": "ok",
-            "environment": "CollapseNet v2",
+            "environment": "CollapseNet v3",
             "capabilities": ["reset", "step", "state", "grade"]
         }
     }
@@ -159,20 +167,23 @@ def tasks():
         "tasks": [
             {
                 "id": "easy",
-                "description": "3 generations, mild collapse, 1 retraining token",
+                "description": "3 generations, mild collapse, 1 retraining token, 5 steps max",
                 "generations": 3,
+                "max_steps": 5,
                 "retraining_budget": 1,
             },
             {
                 "id": "medium",
-                "description": "4 generations, moderate collapse across agents, 1 retraining token",
+                "description": "4 generations, moderate collapse across agents, 1 retraining token, 6 steps max",
                 "generations": 4,
+                "max_steps": 6,
                 "retraining_budget": 1,
             },
             {
                 "id": "hard",
-                "description": "5 generations, severe multi-agent collapse, 2 retraining tokens — not enough to save everyone",
+                "description": "5 generations, severe multi-agent collapse with contamination, 2 retraining tokens, 7 steps max",
                 "generations": 5,
+                "max_steps": 7,
                 "retraining_budget": 2,
             },
         ]
@@ -196,15 +207,11 @@ def step(req: StepRequest):
 def state():
     return env.state()
 
-from fastapi.responses import FileResponse
 
 @app.get("/dashboard")
 def dashboard():
     return FileResponse("dashboard.html")
 
-@app.get("/tester")
-def tester():
-    return FileResponse("tester.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=False)
