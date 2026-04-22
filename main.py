@@ -196,6 +196,12 @@ def step(req: StepRequest):
 def state():
     return env.state()
 
+from fastapi.responses import FileResponse
+
+@app.get("/dashboard")
+def dashboard():
+    return FileResponse("dashboard.html")
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=False)
