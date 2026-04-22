@@ -202,6 +202,9 @@ from fastapi.responses import FileResponse
 def dashboard():
     return FileResponse("dashboard.html")
 
+@app.get("/tester")
+def tester():
+    return FileResponse("tester.html")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=False)
