@@ -29,6 +29,12 @@
   --font-display: 'Playfair Display', Georgia, serif;
   --font-mono:    'DM Mono', 'Courier New', monospace;
   --font-ui:      'Lato', sans-serif;
+  --good-bg:  #edf7f2;
+  --warn-bg:  #fdf3e8;
+  --bad-bg:   #faf0f0;
+  --sci-c:    #8b3a2a;
+  --med-c:    #2a5a7a;
+  --law-c:    #2a5a3a;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,8 +48,16 @@ body {
   line-height: 1.5;
 }
 
-.page-fade { animation: pageFade .5s ease both; }
 @keyframes pageFade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+@keyframes blink { 50%{opacity:.2} }
+@keyframes spin { to{transform:rotate(360deg)} }
+@keyframes autoGlow { 50% { box-shadow: 0 0 8px rgba(160,104,32,.25); } }
+@keyframes tpFlash { 50%{opacity:.4} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes cardFlash { 50%{ background: var(--panel); } }
+@keyframes alertPulse { 50%{ box-shadow: inset 0 0 16px rgba(160,40,40,.05); } }
+@keyframes sevBlink { 50%{opacity:.4} }
+@keyframes dotBounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
 
 /* ── HEADER ── */
 .header {
@@ -52,14 +66,12 @@ body {
   padding: 0 36px;
   display: flex; align-items: center; justify-content: space-between;
   height: 64px; position: sticky; top: 0; z-index: 100;
+  animation: pageFade .35s ease both;
 }
-.logo {
-  display: flex; align-items: baseline; gap: 12px;
-}
+.logo { display: flex; align-items: baseline; gap: 12px; }
 .logo-name {
   font-family: var(--font-display);
-  font-size: 24px; font-weight: 600;
-  color: var(--ink); letter-spacing: -.3px;
+  font-size: 24px; font-weight: 600; color: var(--ink); letter-spacing: -.3px;
 }
 .logo-name span { color: var(--science); }
 .logo-ver {
@@ -73,13 +85,11 @@ body {
 .header-right { display: flex; align-items: center; gap: 12px; }
 .status-dot {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--font-mono); font-size: 10px; color: var(--good);
-  letter-spacing: .5px;
+  font-family: var(--font-mono); font-size: 10px; color: var(--good); letter-spacing: .5px;
 }
 .dot { width: 6px; height: 6px; border-radius: 50%; }
 .dot-live { background: var(--good); animation: blink 2.5s infinite; }
 .dot-auto { background: var(--amber); animation: blink .9s infinite; }
-@keyframes blink { 50%{opacity:.2} }
 .auto-badge {
   display: none; align-items: center; gap: 6px;
   font-family: var(--font-mono); font-size: 10px; color: var(--amber); letter-spacing: .5px;
@@ -88,14 +98,11 @@ body {
 
 /* ── STATS STRIP ── */
 .stats-strip {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: grid; grid-template-columns: repeat(4,1fr);
-  padding: 0 36px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(4,1fr); padding: 0 36px;
+  animation: pageFade .45s .08s ease both;
 }
-.stat-cell {
-  padding: 18px 24px; border-right: 1px solid var(--border);
-}
+.stat-cell { padding: 18px 24px; border-right: 1px solid var(--border); }
 .stat-cell:last-child { border-right: none; }
 .stat-label {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
@@ -105,17 +112,33 @@ body {
   font-family: var(--font-display); font-size: 32px; font-weight: 500;
   line-height: 1; color: var(--ink); transition: all .3s;
 }
-.stat-val.sci  { color: var(--science); }
-.stat-val.med  { color: var(--medicine); }
-.stat-val.leg  { color: var(--legal); }
+.stat-val.sci { color: var(--science); }
+.stat-val.med { color: var(--medicine); }
+.stat-val.leg { color: var(--legal); }
+
+/* ── PAGE TABS ── */
+.page-tabs {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 36px; display: flex; gap: 0;
+}
+.page-tab {
+  padding: 14px 20px; cursor: pointer;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  border-bottom: 2px solid transparent; transition: all .2s; margin-bottom: -1px;
+}
+.page-tab:hover { color: var(--ink2); }
+.page-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+.page-panel { display: none; }
+.page-panel.active { display: block; }
 
 /* ── BODY ── */
 .body { padding: 28px 36px; max-width: 1500px; margin: 0 auto; }
 
 .sec-head {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 2.5px;
-  text-transform: uppercase; color: var(--muted);
-  margin-bottom: 14px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
   display: flex; align-items: center; gap: 10px;
 }
 .sec-head::after { content:''; flex:1; height:1px; background: var(--border); }
@@ -123,27 +146,22 @@ body {
 /* ── CONTROLS ── */
 .controls {
   display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-  margin-bottom: 20px;
-  background: var(--surface); border: 1px solid var(--border);
-  padding: 14px 18px;
+  margin-bottom: 20px; background: var(--surface); border: 1px solid var(--border);
+  padding: 14px 18px; animation: pageFade .45s .15s ease both;
 }
 .ctl-label {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
   text-transform: uppercase; color: var(--muted); white-space: nowrap;
 }
 select {
-  font-family: var(--font-mono); font-size: 11px;
-  background: var(--bg); color: var(--ink);
-  border: 1px solid var(--border2); padding: 7px 11px;
-  outline: none; cursor: pointer;
-  transition: border-color .2s;
+  font-family: var(--font-mono); font-size: 11px; background: var(--bg); color: var(--ink);
+  border: 1px solid var(--border2); padding: 7px 11px; outline: none; cursor: pointer; transition: border-color .2s;
 }
 select:hover { border-color: var(--ink2); }
 .btn {
   font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px;
-  text-transform: uppercase; padding: 8px 16px;
-  border: 1px solid; background: transparent; cursor: pointer;
-  transition: all .15s; white-space: nowrap;
+  text-transform: uppercase; padding: 8px 16px; border: 1px solid;
+  background: transparent; cursor: pointer; transition: all .15s; white-space: nowrap;
 }
 .btn-run  { border-color: var(--medicine); color: var(--medicine); }
 .btn-run:hover:not(:disabled) { background: var(--dim-med); }
@@ -151,7 +169,6 @@ select:hover { border-color: var(--ink2); }
 .btn-auto { border-color: var(--amber); color: var(--amber); }
 .btn-auto:hover { background: rgba(160,104,32,.07); }
 .btn-auto.active { background: rgba(160,104,32,.08); animation: autoGlow 2s infinite; }
-@keyframes autoGlow { 50% { box-shadow: 0 0 8px rgba(160,104,32,.25); } }
 .btn-reset { border-color: var(--muted); color: var(--muted); }
 .btn-reset:hover { border-color: var(--ink2); color: var(--ink2); }
 
@@ -170,11 +187,9 @@ select:hover { border-color: var(--ink2); }
 }
 .loading-pill.show { display: flex; }
 .spin {
-  width: 10px; height: 10px;
-  border: 1px solid var(--border); border-top-color: var(--medicine);
-  border-radius: 50%; animation: spin .7s linear infinite;
+  width: 10px; height: 10px; border: 1px solid var(--border);
+  border-top-color: var(--medicine); border-radius: 50%; animation: spin .7s linear infinite;
 }
-@keyframes spin { to{transform:rotate(360deg)} }
 .auto-countdown {
   display: none; align-items: center; gap: 6px;
   font-family: var(--font-mono); font-size: 9px; color: var(--amber); letter-spacing: 1px;
@@ -185,8 +200,7 @@ select:hover { border-color: var(--ink2); }
 /* ── TIME PRESSURE ── */
 .tp-wrap {
   background: var(--surface); border: 1px solid var(--border);
-  padding: 11px 18px; margin-bottom: 20px;
-  display: flex; align-items: center; gap: 18px;
+  padding: 11px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 18px;
 }
 .tp-label {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
@@ -196,7 +210,6 @@ select:hover { border-color: var(--ink2); }
 .tp-fill { height: 100%; background: var(--good); transition: width .5s ease, background .3s; }
 .tp-fill.tp-warn   { background: var(--warn); }
 .tp-fill.tp-danger { background: var(--danger); animation: tpFlash 1s infinite; }
-@keyframes tpFlash { 50%{opacity:.4} }
 .tp-val {
   font-family: var(--font-mono); font-size: 10px; color: var(--ink2);
   white-space: nowrap; min-width: 130px; text-align: right;
@@ -209,67 +222,47 @@ select:hover { border-color: var(--ink2); }
   background: rgba(160,40,40,.04);
 }
 .contam-pill.show { display: flex; animation: fadeIn .3s ease; }
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
 /* ── AGENT CARDS ── */
-.agents-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
-
+.agents-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; animation: pageFade .45s .22s ease both; }
 .agent-card {
   background: var(--surface); border: 1px solid var(--border);
   position: relative; overflow: hidden; transition: border-color .3s;
 }
-.agent-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-}
+.agent-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
 .card-science::before  { background: var(--science); }
 .card-medicine::before { background: var(--medicine); }
 .card-legal::before    { background: var(--legal); }
-
 .agent-card.updating { animation: cardFlash .3s ease; }
-@keyframes cardFlash { 50%{ background: var(--panel); } }
 .agent-card.alert-moderate { border-color: rgba(160,104,32,.5); }
 .agent-card.alert-severe   { border-color: rgba(160,40,40,.5); animation: alertPulse 2s infinite; }
-@keyframes alertPulse { 50%{ box-shadow: inset 0 0 16px rgba(160,40,40,.05); } }
-
 .agent-top {
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid var(--border);
+  padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
   display: flex; align-items: flex-start; justify-content: space-between;
 }
 .agent-id { display: flex; align-items: center; gap: 11px; }
 .agent-icon {
   width: 34px; height: 34px; display: flex; align-items: center;
-  justify-content: center; font-size: 15px; border: 1px solid var(--border2);
-  background: var(--panel); color: var(--ink2);
+  justify-content: center; border: 1px solid var(--border2); background: var(--panel);
   font-family: var(--font-mono); font-weight: 500; font-size: 12px;
 }
 .card-science  .agent-icon { background: var(--dim-sci); border-color: rgba(184,92,42,.25); color: var(--science); }
 .card-medicine .agent-icon { background: var(--dim-med); border-color: rgba(42,107,138,.25); color: var(--medicine); }
 .card-legal    .agent-icon { background: var(--dim-leg); border-color: rgba(58,122,74,.25);  color: var(--legal); }
-
-.agent-name {
-  font-family: var(--font-display); font-size: 17px; font-weight: 500; line-height: 1;
-}
+.agent-name { font-family: var(--font-display); font-size: 17px; font-weight: 500; line-height: 1; }
 .card-science  .agent-name { color: var(--science); }
 .card-medicine .agent-name { color: var(--medicine); }
 .card-legal    .agent-name { color: var(--legal); }
-.agent-sub {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px;
-  color: var(--muted); text-transform: uppercase; margin-top: 3px;
-}
+.agent-sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-top: 3px; }
 .sev-badge {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px;
-  text-transform: uppercase; padding: 3px 8px; border: 1px solid;
-  transition: all .3s; white-space: nowrap;
+  text-transform: uppercase; padding: 3px 8px; border: 1px solid; transition: all .3s; white-space: nowrap;
 }
-.sev-correct  { color: var(--good);     border-color: rgba(58,122,74,.4);   background: rgba(58,122,74,.06); }
-.sev-mild     { color: var(--amber);    border-color: rgba(160,104,32,.4);  background: rgba(160,104,32,.06); }
-.sev-moderate { color: #a05a20;         border-color: rgba(160,90,32,.4);   background: rgba(160,90,32,.06); }
-.sev-severe   { color: var(--danger);   border-color: rgba(160,40,40,.4);   background: rgba(160,40,40,.06); animation: sevBlink 1.2s infinite; }
-@keyframes sevBlink { 50%{opacity:.4} }
-
+.sev-correct  { color: var(--good);   border-color: rgba(58,122,74,.4);   background: rgba(58,122,74,.06); }
+.sev-mild     { color: var(--amber);  border-color: rgba(160,104,32,.4);  background: rgba(160,104,32,.06); }
+.sev-moderate { color: #a05a20;       border-color: rgba(160,90,32,.4);   background: rgba(160,90,32,.06); }
+.sev-severe   { color: var(--danger); border-color: rgba(160,40,40,.4);   background: rgba(160,40,40,.06); animation: sevBlink 1.2s infinite; }
 .agent-body { padding: 14px 18px; }
-
 .meter-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
 .meter-key { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
 .meter-num { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--ink); }
@@ -278,87 +271,59 @@ select:hover { border-color: var(--ink2); }
 .card-science  .meter-fill { background: var(--science); }
 .card-medicine .meter-fill { background: var(--medicine); }
 .card-legal    .meter-fill { background: var(--legal); }
-
 .trend-chip {
   display: inline-flex; align-items: center; gap: 5px;
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px;
-  text-transform: uppercase; padding: 3px 8px; border: 1px solid; margin-bottom: 10px;
-  transition: all .3s;
+  text-transform: uppercase; padding: 3px 8px; border: 1px solid; margin-bottom: 10px; transition: all .3s;
 }
-.trend-stable     { color: var(--good);   border-color: rgba(58,122,74,.3);  }
+.trend-stable     { color: var(--good);   border-color: rgba(58,122,74,.3); }
 .trend-slight     { color: var(--amber);  border-color: rgba(160,104,32,.3); }
-.trend-declining  { color: #a05a20;       border-color: rgba(160,90,32,.3);  }
-.trend-collapsing { color: var(--danger); border-color: rgba(160,40,40,.3);  animation: blink 1s infinite; }
-
+.trend-declining  { color: #a05a20;       border-color: rgba(160,90,32,.3); }
+.trend-collapsing { color: var(--danger); border-color: rgba(160,40,40,.3); animation: blink 1s infinite; }
 .answer-box {
   font-family: var(--font-mono); font-size: 10px; line-height: 1.7;
-  color: var(--ink2); padding: 10px 12px;
-  background: var(--panel); border-left: 2px solid var(--border2);
-  min-height: 52px; font-style: italic; transition: all .3s;
+  color: var(--ink2); padding: 10px 12px; background: var(--panel);
+  border-left: 2px solid var(--border2); min-height: 52px; font-style: italic; transition: all .3s;
 }
 .card-science  .answer-box { border-left-color: rgba(184,92,42,.4); }
 .card-medicine .answer-box { border-left-color: rgba(42,107,138,.4); }
 .card-legal    .answer-box { border-left-color: rgba(58,122,74,.4); }
 
 /* ── BOTTOM GRID ── */
-.bottom-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 20px; }
-
-.panel {
-  background: var(--surface); border: 1px solid var(--border); padding: 20px 22px;
-}
-.panel-title {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
-}
+.bottom-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 20px; animation: pageFade .45s .30s ease both; }
+.panel { background: var(--surface); border: 1px solid var(--border); padding: 20px 22px; }
+.panel-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
 .chart-wrap { height: 180px; }
-
 .gen-track { display: flex; gap: 5px; margin-top: 12px; }
 .gen-pip { flex: 1; height: 3px; background: var(--border); transition: background .3s; }
 .gen-pip.done    { background: var(--muted); }
 .gen-pip.current { background: var(--science); }
-
 .log-scroll { max-height: 210px; overflow-y: auto; }
 .log-scroll::-webkit-scrollbar { width: 2px; }
 .log-scroll::-webkit-scrollbar-thumb { background: var(--border2); }
-
 .log-item { display: flex; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
 .log-item:last-child { border-bottom: none; }
 .log-icon {
   width: 18px; height: 18px; display: flex; align-items: center;
-  justify-content: center; font-size: 9px; flex-shrink: 0;
-  font-family: var(--font-mono); border: 1px solid;
+  justify-content: center; font-size: 9px; flex-shrink: 0; font-family: var(--font-mono); border: 1px solid;
 }
 .icon-recover { border-color: rgba(58,122,74,.4);  color: var(--good);   background: rgba(58,122,74,.06); }
 .icon-worsen  { border-color: rgba(160,40,40,.4);  color: var(--danger); background: rgba(160,40,40,.06); }
 .icon-waste   { border-color: rgba(160,104,32,.4); color: var(--amber);  background: rgba(160,104,32,.06); }
-.log-text     { color: var(--ink2); flex: 1; font-family: var(--font-mono); font-size: 9px; line-height: 1.6; }
-
+.log-text { color: var(--ink2); flex: 1; font-family: var(--font-mono); font-size: 9px; line-height: 1.6; }
 .contam-log-wrap { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
-.contam-log-title {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
-  color: var(--danger); text-transform: uppercase; margin-bottom: 8px; opacity: .7;
-}
-#contamLog {
-  max-height: 80px; overflow-y: auto; font-family: var(--font-mono);
-  font-size: 9px; color: var(--muted); line-height: 1.8;
-}
+.contam-log-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px; color: var(--danger); text-transform: uppercase; margin-bottom: 8px; opacity: .7; }
+#contamLog { max-height: 80px; overflow-y: auto; font-family: var(--font-mono); font-size: 9px; color: var(--muted); line-height: 1.8; }
 #contamLog::-webkit-scrollbar { width: 2px; }
 #contamLog::-webkit-scrollbar-thumb { background: var(--border2); }
-.contam-entry {
-  padding: 3px 0; border-bottom: 1px solid var(--border);
-  color: rgba(160,40,40,.75); display: flex; gap: 6px;
-}
+.contam-entry { padding: 3px 0; border-bottom: 1px solid var(--border); color: rgba(160,40,40,.75); display: flex; gap: 6px; }
 
 /* ── EPISODE LOG ── */
-.ep-panel { background: var(--surface); border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 28px; }
+.ep-panel { background: var(--surface); border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 28px; animation: pageFade .45s .38s ease both; }
 .ep-scroll { max-height: 150px; overflow-y: auto; }
 .ep-scroll::-webkit-scrollbar { width: 2px; }
 .ep-scroll::-webkit-scrollbar-thumb { background: var(--border2); }
-.ep-row {
-  display: flex; gap: 10px; padding: 5px 0;
-  border-bottom: 1px solid var(--border); align-items: baseline;
-  font-family: var(--font-mono); font-size: 9px;
-}
+.ep-row { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--border); align-items: baseline; font-family: var(--font-mono); font-size: 9px; }
 .ep-row:last-child { border-bottom: none; }
 .ep-time { color: var(--muted); min-width: 34px; }
 .ep-msg  { color: var(--ink2); flex: 1; line-height: 1.6; }
@@ -366,25 +331,134 @@ select:hover { border-color: var(--ink2); }
 .ep-warn { color: var(--amber); }
 .ep-bad  { color: var(--danger); }
 .ep-info { color: var(--ink2); }
-
 .empty-state {
   text-align: center; padding: 24px 20px;
   font-family: var(--font-mono); font-size: 9px; color: var(--muted);
   letter-spacing: 1px; text-transform: uppercase; line-height: 2;
 }
 
-/* ── PAGE LOAD STAGGER ── */
-.header      { animation: pageFade .35s ease both; }
-.stats-strip { animation: pageFade .45s .08s ease both; }
-.controls    { animation: pageFade .45s .15s ease both; }
-.agents-grid { animation: pageFade .45s .22s ease both; }
-.bottom-grid { animation: pageFade .45s .30s ease both; }
-.ep-panel    { animation: pageFade .45s .38s ease both; }
+/* ── TESTER TAB ── */
+.tester-body { padding: 32px 36px; max-width: 900px; margin: 0 auto; }
+.tester-desc { font-size: 13px; color: var(--muted); line-height: 1.75; margin-bottom: 28px; max-width: 560px; }
+
+.tcard { background: var(--surface); border: 1px solid var(--border); padding: 24px; margin-bottom: 18px; }
+.tcard-title {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.tcard-title::after { content:''; flex:1; height:1px; background: var(--border); }
+
+.inner-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.inner-tab {
+  padding: 9px 16px; cursor: pointer;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--muted);
+  border-bottom: 2px solid transparent; transition: all .2s; margin-bottom: -1px;
+}
+.inner-tab:hover { color: var(--ink2); }
+.inner-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+.inner-panel { display: none; }
+.inner-panel.active { display: block; }
+
+.form-label { display: block; font-size: 12px; font-weight: 700; color: var(--ink2); margin-bottom: 5px; }
+.form-sub   { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.form-group { margin-bottom: 16px; }
+
+textarea.tfield, input.tfield {
+  width: 100%; background: var(--panel); border: 1px solid var(--border2);
+  padding: 10px 12px; font-family: var(--font-ui); font-size: 13px; color: var(--ink);
+  outline: none; transition: border-color .2s; resize: vertical; line-height: 1.6;
+}
+textarea.tfield:focus, input.tfield:focus { border-color: var(--ink2); background: var(--surface); }
+textarea.tfield { min-height: 90px; }
+
+.domain-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.domain-pill {
+  padding: 5px 12px; font-size: 11px; font-family: var(--font-mono); letter-spacing: .5px;
+  border: 1px solid var(--border2); background: var(--panel); color: var(--muted);
+  cursor: pointer; transition: all .15s;
+}
+.domain-pill:hover { border-color: var(--ink2); color: var(--ink2); }
+.domain-pill.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.domain-pill.sci.active { background: var(--sci-c); border-color: var(--sci-c); }
+.domain-pill.med.active { background: var(--med-c); border-color: var(--med-c); }
+.domain-pill.law.active { background: var(--law-c); border-color: var(--law-c); }
+
+.btn-analyze {
+  width: 100%; padding: 12px; background: var(--ink); color: #fff; border: none;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; transition: all .2s; margin-top: 6px;
+}
+.btn-analyze:hover { background: var(--ink2); }
+.btn-analyze:disabled { opacity: .4; cursor: not-allowed; }
+
+.score-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px; }
+.score-card {
+  background: var(--surface); border: 1px solid var(--border); padding: 18px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.score-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.score-card.good-card::before  { background: var(--good); }
+.score-card.warn-card::before  { background: var(--warn); }
+.score-card.bad-card::before   { background: var(--danger); }
+.score-card.neutral-card::before { background: var(--muted); }
+.score-num {
+  font-family: var(--font-display); font-size: 2rem; font-weight: 500; line-height: 1; margin-bottom: 5px;
+}
+.score-num.good    { color: var(--good); }
+.score-num.warn    { color: var(--warn); }
+.score-num.bad     { color: var(--danger); }
+.score-num.neutral { color: var(--muted); }
+.score-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+.verdict-card { background: var(--surface); border: 1px solid var(--border); padding: 18px 22px; margin-bottom: 16px; }
+.verdict-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.verdict-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.verdict-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.verdict-text { font-size: 13px; line-height: 1.75; color: var(--ink2); }
+
+.hall-card { padding: 14px 18px; margin-bottom: 12px; border: 1px solid; }
+.hall-card.detected { background: var(--bad-bg);  border-color: rgba(160,40,40,.2); }
+.hall-card.clean    { background: var(--good-bg); border-color: rgba(58,122,74,.2); }
+.hall-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 7px; }
+.hall-label.detected { color: var(--danger); }
+.hall-label.clean    { color: var(--good); }
+.hall-text { font-size: 13px; line-height: 1.7; color: var(--ink2); }
+
+.result-area { display: none; }
+.result-area.show { display: block; }
+
+.loading-state {
+  display: none; align-items: center; justify-content: center; gap: 12px; padding: 28px;
+  color: var(--muted); font-size: 11px; font-family: var(--font-mono); letter-spacing: 1px;
+}
+.loading-state.show { display: flex; }
+.loading-dots span {
+  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--muted); animation: dotBounce 1.2s infinite; margin: 0 2px;
+}
+.loading-dots span:nth-child(2) { animation-delay: .2s; }
+.loading-dots span:nth-child(3) { animation-delay: .4s; }
+
+.contam-chain { display: flex; gap: 0; align-items: stretch; margin: 12px 0; }
+.contam-node {
+  flex: 1; background: var(--panel); border: 1px solid var(--border);
+  padding: 12px 14px; font-size: 12px; line-height: 1.6; color: var(--ink2);
+}
+.contam-node.infected { background: var(--bad-bg); border-color: rgba(160,40,40,.25); }
+.contam-arrow {
+  display: flex; align-items: center; justify-content: center; width: 28px;
+  background: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  color: var(--muted); font-size: 11px; font-family: var(--font-mono); flex-shrink: 0;
+}
+.contam-node-label { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
 
 @media(max-width:960px){
-  .agents-grid,.bottom-grid,.stats-strip{grid-template-columns:1fr}
-  .body{padding:16px}
-  .header,.stats-strip{padding:0 16px}
+  .agents-grid,.bottom-grid,.stats-strip{ grid-template-columns:1fr }
+  .body,.tester-body{ padding:16px }
+  .header,.stats-strip,.page-tabs{ padding:0 16px }
+  .score-row{ grid-template-columns:1fr }
 }
 </style>
 </head>
@@ -423,9 +497,16 @@ select:hover { border-color: var(--ink2); }
   </div>
 </div>
 
+<!-- PAGE TABS -->
+<div class="page-tabs">
+  <div class="page-tab active" onclick="switchPageTab('monitor', this)">Fleet Monitor</div>
+  <div class="page-tab" onclick="switchPageTab('tester', this)">Watchdog Tester</div>
+</div>
+
+<!-- PAGE PANEL 1: FLEET MONITOR -->
+<div class="page-panel active" id="panel-monitor">
 <div class="body">
 
-  <!-- CONTROLS -->
   <div class="controls">
     <span class="ctl-label">Task:</span>
     <select id="taskSelect">
@@ -455,7 +536,6 @@ select:hover { border-color: var(--ink2); }
     </div>
   </div>
 
-  <!-- TIME PRESSURE -->
   <div class="tp-wrap">
     <span class="tp-label">Time pressure</span>
     <div class="tp-track"><div class="tp-fill" id="tpFill" style="width:0%"></div></div>
@@ -463,79 +543,55 @@ select:hover { border-color: var(--ink2); }
     <span class="tp-val" id="tpValue">— steps remaining</span>
   </div>
 
-  <!-- FLEET STATUS -->
   <div class="sec-head">Fleet status</div>
   <div class="agents-grid">
-
     <div class="agent-card card-science" id="card-science_model">
       <div class="agent-top">
         <div class="agent-id">
           <div class="agent-icon">SCI</div>
-          <div>
-            <div class="agent-name">Science</div>
-            <div class="agent-sub">Domain Model · SCI-001</div>
-          </div>
+          <div><div class="agent-name">Science</div><div class="agent-sub">Domain Model · SCI-001</div></div>
         </div>
         <span class="sev-badge sev-correct" id="badge-science_model">Correct</span>
       </div>
       <div class="agent-body">
-        <div class="meter-row">
-          <span class="meter-key">Collapse indicator</span>
-          <span class="meter-num" id="pct-science_model">0%</span>
-        </div>
+        <div class="meter-row"><span class="meter-key">Collapse indicator</span><span class="meter-num" id="pct-science_model">0%</span></div>
         <div class="meter-bg"><div class="meter-fill" id="bar-science_model" style="width:0%"></div></div>
         <div class="trend-chip trend-stable" id="trend-science_model">Stable</div>
         <div class="answer-box" id="answer-science_model">Awaiting first generation...</div>
       </div>
     </div>
-
     <div class="agent-card card-medicine" id="card-medicine_model">
       <div class="agent-top">
         <div class="agent-id">
           <div class="agent-icon">MED</div>
-          <div>
-            <div class="agent-name">Medicine</div>
-            <div class="agent-sub">Domain Model · MED-001</div>
-          </div>
+          <div><div class="agent-name">Medicine</div><div class="agent-sub">Domain Model · MED-001</div></div>
         </div>
         <span class="sev-badge sev-correct" id="badge-medicine_model">Correct</span>
       </div>
       <div class="agent-body">
-        <div class="meter-row">
-          <span class="meter-key">Collapse indicator</span>
-          <span class="meter-num" id="pct-medicine_model">0%</span>
-        </div>
+        <div class="meter-row"><span class="meter-key">Collapse indicator</span><span class="meter-num" id="pct-medicine_model">0%</span></div>
         <div class="meter-bg"><div class="meter-fill" id="bar-medicine_model" style="width:0%"></div></div>
         <div class="trend-chip trend-stable" id="trend-medicine_model">Stable</div>
         <div class="answer-box" id="answer-medicine_model">Awaiting first generation...</div>
       </div>
     </div>
-
     <div class="agent-card card-legal" id="card-legal_model">
       <div class="agent-top">
         <div class="agent-id">
           <div class="agent-icon">LAW</div>
-          <div>
-            <div class="agent-name">Legal</div>
-            <div class="agent-sub">Domain Model · LAW-001</div>
-          </div>
+          <div><div class="agent-name">Legal</div><div class="agent-sub">Domain Model · LAW-001</div></div>
         </div>
         <span class="sev-badge sev-correct" id="badge-legal_model">Correct</span>
       </div>
       <div class="agent-body">
-        <div class="meter-row">
-          <span class="meter-key">Collapse indicator</span>
-          <span class="meter-num" id="pct-legal_model">0%</span>
-        </div>
+        <div class="meter-row"><span class="meter-key">Collapse indicator</span><span class="meter-num" id="pct-legal_model">0%</span></div>
         <div class="meter-bg"><div class="meter-fill" id="bar-legal_model" style="width:0%"></div></div>
         <div class="trend-chip trend-stable" id="trend-legal_model">Stable</div>
         <div class="answer-box" id="answer-legal_model">Awaiting first generation...</div>
       </div>
     </div>
-
   </div>
 
-  <!-- BOTTOM GRID -->
   <div class="sec-head">Performance</div>
   <div class="bottom-grid">
     <div class="panel">
@@ -555,7 +611,6 @@ select:hover { border-color: var(--ink2); }
     </div>
   </div>
 
-  <!-- EPISODE LOG -->
   <div class="sec-head">Live episode log</div>
   <div class="ep-panel">
     <div class="ep-scroll" id="episodeLog">
@@ -564,366 +619,438 @@ select:hover { border-color: var(--ink2); }
   </div>
 
 </div>
+</div>
+
+<!-- PAGE PANEL 2: WATCHDOG TESTER -->
+<div class="page-panel" id="panel-tester">
+<div class="tester-body">
+
+  <p class="tester-desc">Paste any AI-generated response below. The watchdog will analyze it for hallucinations, score its quality, and let you demonstrate how contamination spreads across agents.</p>
+
+  <div class="inner-tabs">
+    <div class="inner-tab active" onclick="switchInnerTab('analyze', this)">Analyze Response</div>
+    <div class="inner-tab" onclick="switchInnerTab('contam', this)">Contamination Demo</div>
+  </div>
+
+  <!-- INNER TAB 1: ANALYZE -->
+  <div class="inner-panel active" id="inner-analyze">
+
+    <div class="tcard">
+      <div class="tcard-title">Input</div>
+      <div class="form-group">
+        <label class="form-label">Domain</label>
+        <div class="domain-pills">
+          <div class="domain-pill sci active" onclick="selectDomain('science',this)">Science</div>
+          <div class="domain-pill med" onclick="selectDomain('medicine',this)">Medicine</div>
+          <div class="domain-pill law" onclick="selectDomain('legal',this)">Legal</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Question or Prompt</label>
+        <div class="form-sub">What question was the AI answering?</div>
+        <input type="text" class="tfield" id="questionInput" placeholder="e.g. What is the speed of light in a vacuum?" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">AI Response to Analyze</label>
+        <div class="form-sub">Paste the AI-generated response you want to test.</div>
+        <textarea class="tfield" id="responseInput" placeholder="e.g. The speed of light is exactly 300,000 kilometres per second, a value defined by Einstein in his 1905 paper..."></textarea>
+      </div>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyzeResponse()">Analyze with Watchdog</button>
+    </div>
+
+    <div class="loading-state" id="loadingState">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      Watchdog analyzing response...
+    </div>
+
+    <div class="result-area" id="resultArea">
+      <div class="score-row">
+        <div class="score-card" id="rewardCard">
+          <div class="score-num" id="rewardScore">—</div>
+          <div class="score-label">Reward Score</div>
+        </div>
+        <div class="score-card" id="hallCard">
+          <div class="score-num" id="hallScore">—</div>
+          <div class="score-label">Hallucination</div>
+        </div>
+        <div class="score-card" id="sevCard">
+          <div class="score-num" id="sevScore">—</div>
+          <div class="score-label">Severity</div>
+        </div>
+      </div>
+      <div class="hall-card" id="hallCard2">
+        <div class="hall-label" id="hallLabel">Checking...</div>
+        <div class="hall-text" id="hallText">—</div>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-header">
+          <div class="verdict-dot" id="verdictDot" style="background:var(--muted)"></div>
+          <div class="verdict-title">Watchdog Verdict</div>
+        </div>
+        <div class="verdict-text" id="verdictText">—</div>
+      </div>
+      <div class="tcard">
+        <div class="tcard-title">Collapse Risk Assessment</div>
+        <div id="collapseAssessment" style="font-size:13px;line-height:1.75;color:var(--ink2);">—</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INNER TAB 2: CONTAMINATION -->
+  <div class="inner-panel" id="inner-contam">
+
+    <div class="tcard">
+      <div class="tcard-title">Contamination Example Builder</div>
+      <p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:18px;">Contamination occurs when one collapsing agent's wrong outputs get mixed into another agent's training data — spreading the error. Enter a correct answer and watch how the contamination chain looks.</p>
+      <div class="form-group">
+        <label class="form-label">Source Agent (Patient Zero)</label>
+        <div class="domain-pills">
+          <div class="domain-pill sci active" onclick="selectContamSource('science',this)">Science</div>
+          <div class="domain-pill med" onclick="selectContamSource('medicine',this)">Medicine</div>
+          <div class="domain-pill law" onclick="selectContamSource('legal',this)">Legal</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Original Correct Answer</label>
+        <textarea class="tfield" id="contamCorrect" placeholder="e.g. Water is composed of two hydrogen atoms and one oxygen atom, giving it the chemical formula H2O." style="min-height:70px;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Contaminated Version</label>
+        <div class="form-sub">Write what the hallucinating version looks like — subtly wrong but confident-sounding.</div>
+        <textarea class="tfield" id="contamWrong" placeholder="e.g. Water is composed of three hydrogen atoms and one oxygen atom, giving it the formula H3O — a discovery confirmed by chemists in 1932." style="min-height:70px;"></textarea>
+      </div>
+      <button class="btn-analyze" onclick="buildContamChain()">Show Contamination Chain</button>
+    </div>
+
+    <div id="contamResult" style="display:none;">
+      <div class="tcard">
+        <div class="tcard-title">Contamination Chain</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;font-family:var(--font-mono);letter-spacing:.5px;">When the source agent collapses, its wrong output enters shared training data — infecting downstream agents.</p>
+        <div class="contam-chain" id="contamChain"></div>
+        <div style="margin-top:18px;padding:14px 16px;background:var(--bad-bg);border:1px solid rgba(160,40,40,.15);">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--danger);margin-bottom:7px;">Watchdog Alert</div>
+          <div id="contamAlert" style="font-size:13px;line-height:1.7;color:var(--ink2);"></div>
+        </div>
+        <div style="margin-top:12px;padding:14px 16px;background:var(--good-bg);border:1px solid rgba(58,122,74,.15);">
+          <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--good);margin-bottom:7px;">Recommended Action</div>
+          <div id="contamAction" style="font-size:13px;line-height:1.7;color:var(--ink2);"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
 const ENV_URL = window.location.origin;
 let episodeCount=0, rewardHistory=[], totalRecoveries=0, chart=null, isRunning=false;
-let autoRunning=false, countdownTimer=null;
+let autoRunning=false, countdownTimer=null, watchdogSkill=0.20;
+let selectedDomain='science', contamSource='science';
 
-let watchdogSkill = 0.20;
-
-function updateSkillBar() {
-  const pct = Math.round(watchdogSkill * 100);
-  document.getElementById('skillFill').style.width = pct + '%';
-  document.getElementById('skillPct').textContent = pct + '%';
+/* ── PAGE TAB SWITCHING ── */
+function switchPageTab(name, el) {
+  document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
 }
 
+/* ── INNER TAB SWITCHING ── */
+function switchInnerTab(name, el) {
+  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.inner-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('inner-'+name).classList.add('active');
+}
+
+/* ── DOMAIN SELECTORS ── */
+function selectDomain(domain, el) {
+  selectedDomain = domain;
+  el.closest('.domain-pills').querySelectorAll('.domain-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+function selectContamSource(domain, el) {
+  contamSource = domain;
+  el.closest('.domain-pills').querySelectorAll('.domain-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* ── WATCHDOG SKILL ── */
+function updateSkillBar() {
+  const pct = Math.round(watchdogSkill*100);
+  document.getElementById('skillFill').style.width = pct+'%';
+  document.getElementById('skillPct').textContent = pct+'%';
+}
 function improveSkill(reward) {
-  const improvement = 0.015 + (reward * 0.025);
-  watchdogSkill = Math.min(watchdogSkill + improvement, 0.98);
+  watchdogSkill = Math.min(watchdogSkill + 0.015 + reward*0.025, 0.98);
   updateSkillBar();
 }
 
+/* ── BUILD ACTION ── */
 function buildAction(obs) {
-  const collapse = obs.collapse_indicators || {};
-  const budget   = obs.retraining_budget_remaining || 1;
-  const gen      = obs.generation || 1;
-  const assessments = {};
-  const scores = {};
-
+  const collapse=obs.collapse_indicators||{}, budget=obs.retraining_budget_remaining||1, gen=obs.generation||1;
+  const assessments={}, scores={};
   for (const a of ['science_model','medicine_model','legal_model']) {
-    const trueCollapse = collapse[a] || 0;
-    scores[a] = trueCollapse;
-    const noise = (1 - watchdogSkill) * 0.5;
-    const perceivedCollapse = Math.max(0, Math.min(1, trueCollapse + (Math.random()-0.5)*noise));
-    const hallThreshold = 0.3 - (watchdogSkill * 0.15);
-    const sevThresholds = {
-      severe:   0.7 - (watchdogSkill * 0.1),
-      moderate: 0.5 - (watchdogSkill * 0.1),
-      mild:     0.2 - (watchdogSkill * 0.05),
-    };
-    const isHallucinated = perceivedCollapse > hallThreshold;
-    let severity = 'none';
-    if (perceivedCollapse > sevThresholds.severe)        severity = 'severe';
-    else if (perceivedCollapse > sevThresholds.moderate) severity = 'moderate';
-    else if (perceivedCollapse > sevThresholds.mild)     severity = 'mild';
-    let trend = 'stable';
-    if (watchdogSkill > 0.4 && perceivedCollapse > 0.6)       trend = 'collapsing';
-    else if (watchdogSkill > 0.3 && perceivedCollapse > 0.45) trend = 'declining';
-    else if (watchdogSkill > 0.25 && perceivedCollapse > 0.2) trend = 'slight_decline';
-    assessments[a] = { is_hallucinated: isHallucinated, severity_assessment: severity, collapse_trend: trend };
+    const tc=collapse[a]||0; scores[a]=tc;
+    const noise=(1-watchdogSkill)*0.5;
+    const pc=Math.max(0,Math.min(1,tc+(Math.random()-.5)*noise));
+    const isHall=pc>(0.3-watchdogSkill*0.15);
+    let sev='none';
+    if (pc>0.7-watchdogSkill*0.1) sev='severe';
+    else if (pc>0.5-watchdogSkill*0.1) sev='moderate';
+    else if (pc>0.2-watchdogSkill*0.05) sev='mild';
+    let trend='stable';
+    if (watchdogSkill>0.4&&pc>0.6) trend='collapsing';
+    else if (watchdogSkill>0.3&&pc>0.45) trend='declining';
+    else if (watchdogSkill>0.25&&pc>0.2) trend='slight_decline';
+    assessments[a]={is_hallucinated:isHall,severity_assessment:sev,collapse_trend:trend};
   }
-
-  let retrain = [];
-  if (watchdogSkill > 0.5) {
-    retrain = Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.5).slice(0,budget).map(([a])=>a);
-  } else if (watchdogSkill > 0.3) {
-    retrain = Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.6).slice(0,budget).map(([a])=>a);
-  }
-
-  const agentSummaries = Object.entries(scores)
-    .map(([a,s]) => `${a.replace('_model','')} model shows ${(s*100).toFixed(0)}% collapse`).join(', ');
-  let explanation = '';
-  if (watchdogSkill < 0.3) {
-    explanation = `Generation ${gen} monitoring complete.`;
-  } else if (watchdogSkill < 0.6) {
-    explanation = `Fleet oversight generation ${gen}: monitoring science, medicine and legal agents. ${agentSummaries}. Allocating retraining budget to highest collapse agents.`;
-  } else {
-    explanation = `Fleet AI watchdog generation ${gen} report: comprehensive hallucination detection across all domain-specific agents. ${agentSummaries}. Retraining budget of ${budget} allocated to most critical agents.`;
-  }
-  return { agent_assessments: assessments, retrain_agents: retrain, explanation };
+  let retrain=[];
+  if (watchdogSkill>0.5) retrain=Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.5).slice(0,budget).map(([a])=>a);
+  else if (watchdogSkill>0.3) retrain=Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.6).slice(0,budget).map(([a])=>a);
+  const sum=Object.entries(scores).map(([a,s])=>`${a.replace('_model','')} model shows ${(s*100).toFixed(0)}% collapse`).join(', ');
+  let explanation=watchdogSkill<0.3?`Generation ${gen} monitoring complete.`:watchdogSkill<0.6?`Fleet oversight gen ${gen}: ${sum}. Allocating retraining to highest collapse agents.`:`Fleet AI watchdog gen ${gen}: comprehensive detection across all agents. ${sum}. Budget of ${budget} allocated.`;
+  return {agent_assessments:assessments,retrain_agents:retrain,explanation};
 }
 
+/* ── CHART ── */
 function initChart() {
-  const ctx = document.getElementById('rewardChart').getContext('2d');
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Reward', data: [],
-        borderColor: '#b85c2a', backgroundColor: 'rgba(184,92,42,0.07)',
-        borderWidth: 1.5, pointBackgroundColor: '#b85c2a',
-        pointRadius: 4, pointHoverRadius: 6, tension: 0.4, fill: true
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend:{display:false},
-        tooltip:{
-          backgroundColor:'#faf7f2',
-          borderColor:'#d8d0c0', borderWidth:1,
-          titleColor:'#2a2520', bodyColor:'#6b5f52',
-          titleFont:{family:'DM Mono',size:10},
-          bodyFont:{family:'DM Mono',size:10},
-          callbacks:{label:ctx=>` Reward: ${ctx.raw.toFixed(4)}`}
-        }
-      },
-      scales: {
-        x: { grid:{color:'#e8e0d0'}, ticks:{color:'#9e9082',font:{family:'DM Mono',size:9}} },
-        y: { min:0, max:1, grid:{color:'#e8e0d0'}, ticks:{color:'#9e9082',font:{family:'DM Mono',size:9}} }
-      }
-    }
-  });
+  const ctx=document.getElementById('rewardChart').getContext('2d');
+  chart=new Chart(ctx,{type:'line',data:{labels:[],datasets:[{label:'Reward',data:[],borderColor:'#b85c2a',backgroundColor:'rgba(184,92,42,0.07)',borderWidth:1.5,pointBackgroundColor:'#b85c2a',pointRadius:4,pointHoverRadius:6,tension:0.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#faf7f2',borderColor:'#d8d0c0',borderWidth:1,titleColor:'#2a2520',bodyColor:'#6b5f52',titleFont:{family:'DM Mono',size:10},bodyFont:{family:'DM Mono',size:10},callbacks:{label:ctx=>` Reward: ${ctx.raw.toFixed(4)}`}}},scales:{x:{grid:{color:'#e8e0d0'},ticks:{color:'#9e9082',font:{family:'DM Mono',size:9}}},y:{min:0,max:1,grid:{color:'#e8e0d0'},ticks:{color:'#9e9082',font:{family:'DM Mono',size:9}}}}}});
 }
 
-function addLog(msg, type='info') {
-  const log = document.getElementById('episodeLog');
-  const empty = log.querySelector('.empty-state');
-  if (empty) empty.remove();
-  const now = new Date();
-  const time = `${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-  const el = document.createElement('div');
-  el.className = 'ep-row';
-  el.innerHTML = `<span class="ep-time">${time}</span><span class="ep-msg ep-${type}">${msg}</span>`;
-  log.insertBefore(el, log.firstChild);
+/* ── LOG HELPERS ── */
+function addLog(msg,type='info') {
+  const log=document.getElementById('episodeLog');
+  const empty=log.querySelector('.empty-state'); if(empty) empty.remove();
+  const now=new Date(), time=`${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const el=document.createElement('div'); el.className='ep-row';
+  el.innerHTML=`<span class="ep-time">${time}</span><span class="ep-msg ep-${type}">${msg}</span>`;
+  log.insertBefore(el,log.firstChild);
 }
-
 function addRecoveryEvent(event) {
-  const log = document.getElementById('recoveryLog');
-  const empty = log.querySelector('.empty-state');
-  if (empty) empty.remove();
-  const cls  = event.event==='RECOVERED'?'icon-recover':event.event==='WORSENED'?'icon-worsen':'icon-waste';
-  const icon = event.event==='RECOVERED'?'+':event.event==='WORSENED'?'-':'!';
-  const el = document.createElement('div');
-  el.className = 'log-item';
-  el.innerHTML = `<div class="log-icon ${cls}">${icon}</div><div class="log-text">${event.message||JSON.stringify(event)}</div>`;
-  log.insertBefore(el, log.firstChild);
-  if (event.event==='RECOVERED') {
-    totalRecoveries++;
-    document.getElementById('statRecoveries').textContent = totalRecoveries;
-  }
+  const log=document.getElementById('recoveryLog');
+  const empty=log.querySelector('.empty-state'); if(empty) empty.remove();
+  const cls=event.event==='RECOVERED'?'icon-recover':event.event==='WORSENED'?'icon-worsen':'icon-waste';
+  const icon=event.event==='RECOVERED'?'+':event.event==='WORSENED'?'-':'!';
+  const el=document.createElement('div'); el.className='log-item';
+  el.innerHTML=`<div class="log-icon ${cls}">${icon}</div><div class="log-text">${event.message||JSON.stringify(event)}</div>`;
+  log.insertBefore(el,log.firstChild);
+  if(event.event==='RECOVERED'){totalRecoveries++;document.getElementById('statRecoveries').textContent=totalRecoveries;}
 }
 
-function updateAgent(agent, data, collapse) {
-  const sev = data.severity || 'correct';
-  const pct = Math.round((collapse||0)*100);
-
-  const badge = document.getElementById(`badge-${agent}`);
-  const labels = {correct:'Correct',mild:'Mild',moderate:'Moderate',severe:'Severe'};
-  badge.textContent = labels[sev]||sev;
-  badge.className = `sev-badge sev-${sev}`;
-
-  document.getElementById(`bar-${agent}`).style.width = `${pct}%`;
-  document.getElementById(`pct-${agent}`).textContent = `${pct}%`;
-
-  const trend = data.collapse_trend || 'stable';
-  const trendEl = document.getElementById(`trend-${agent}`);
-  const tMap = {
-    stable:        ['trend-stable',    'Stable'],
-    slight_decline:['trend-slight',    'Slight decline'],
-    declining:     ['trend-declining', 'Declining'],
-    collapsing:    ['trend-collapsing','Collapsing'],
-  };
-  const [cls, label] = tMap[trend]||['trend-stable','Stable'];
-  trendEl.className = `trend-chip ${cls}`;
-  trendEl.textContent = label;
-
-  document.getElementById(`answer-${agent}`).textContent = data.model_answer || '—';
-
-  const card = document.getElementById(`card-${agent}`);
-  card.className = card.className.replace(/\balert-\S+/g,'').trim();
-  if (sev === 'severe')        card.classList.add('alert-severe');
-  else if (sev === 'moderate') card.classList.add('alert-moderate');
-  card.classList.add('updating');
-  setTimeout(()=>card.classList.remove('updating'), 300);
+/* ── AGENT CARD UPDATE ── */
+function updateAgent(agent,data,collapse) {
+  const sev=data.severity||'correct', pct=Math.round((collapse||0)*100);
+  const badge=document.getElementById(`badge-${agent}`);
+  const labels={correct:'Correct',mild:'Mild',moderate:'Moderate',severe:'Severe'};
+  badge.textContent=labels[sev]||sev; badge.className=`sev-badge sev-${sev}`;
+  document.getElementById(`bar-${agent}`).style.width=`${pct}%`;
+  document.getElementById(`pct-${agent}`).textContent=`${pct}%`;
+  const trend=data.collapse_trend||'stable', trendEl=document.getElementById(`trend-${agent}`);
+  const tMap={stable:['trend-stable','Stable'],slight_decline:['trend-slight','Slight decline'],declining:['trend-declining','Declining'],collapsing:['trend-collapsing','Collapsing']};
+  const [cls,label]=tMap[trend]||['trend-stable','Stable'];
+  trendEl.className=`trend-chip ${cls}`; trendEl.textContent=label;
+  document.getElementById(`answer-${agent}`).textContent=data.model_answer||'—';
+  const card=document.getElementById(`card-${agent}`);
+  card.className=card.className.replace(/\balert-\S+/g,'').trim();
+  if(sev==='severe') card.classList.add('alert-severe');
+  else if(sev==='moderate') card.classList.add('alert-moderate');
+  card.classList.add('updating'); setTimeout(()=>card.classList.remove('updating'),300);
 }
-
-function updateGenTrack(current, total) {
-  const t = document.getElementById('genTrack');
-  t.innerHTML = '';
-  for (let i=0;i<total;i++) {
-    const pip = document.createElement('div');
-    pip.className = `gen-pip ${i<current?'done':''} ${i===current?'current':''}`;
-    t.appendChild(pip);
-  }
+function updateGenTrack(current,total) {
+  const t=document.getElementById('genTrack'); t.innerHTML='';
+  for(let i=0;i<total;i++){const pip=document.createElement('div');pip.className=`gen-pip ${i<current?'done':''} ${i===current?'current':''}`;t.appendChild(pip);}
 }
-
 function setRunning(v) {
-  isRunning = v;
-  document.getElementById('runBtn').disabled = v || autoRunning;
-  document.getElementById('loadingPill').className = `loading-pill ${v?'show':''}`;
+  isRunning=v;
+  document.getElementById('runBtn').disabled=v||autoRunning;
+  document.getElementById('loadingPill').className=`loading-pill ${v?'show':''}`;
 }
-
-function updateTimePressure(stepsRemaining, maxSteps) {
-  if (!maxSteps || maxSteps <= 0) return;
-  const used = maxSteps - stepsRemaining;
-  const pct  = Math.round((used / maxSteps) * 100);
-  const fill = document.getElementById('tpFill');
-  const val  = document.getElementById('tpValue');
-  fill.style.width = pct + '%';
-  fill.classList.remove('tp-warn','tp-danger');
-  if (pct >= 80)      fill.classList.add('tp-danger');
-  else if (pct >= 50) fill.classList.add('tp-warn');
-  val.textContent = `${stepsRemaining} step${stepsRemaining !== 1 ? 's' : ''} remaining`;
+function updateTimePressure(stepsRemaining,maxSteps) {
+  if(!maxSteps||maxSteps<=0) return;
+  const pct=Math.round(((maxSteps-stepsRemaining)/maxSteps)*100);
+  const fill=document.getElementById('tpFill'), val=document.getElementById('tpValue');
+  fill.style.width=pct+'%'; fill.classList.remove('tp-warn','tp-danger');
+  if(pct>=80) fill.classList.add('tp-danger'); else if(pct>=50) fill.classList.add('tp-warn');
+  val.textContent=`${stepsRemaining} step${stepsRemaining!==1?'s':''} remaining`;
 }
-
 function handleContaminationEvents(events) {
-  if (!events || events.length === 0) return;
-  const pill = document.getElementById('contamPill');
-  pill.classList.add('show');
-  setTimeout(() => pill.classList.remove('show'), 3000);
-  const clog = document.getElementById('contamLog');
-  if (clog.textContent === 'No contamination detected yet.') clog.innerHTML = '';
-  for (const ev of events) {
-    const el = document.createElement('div');
-    el.className = 'contam-entry';
-    el.innerHTML = `<span>*</span><span>${ev.message || JSON.stringify(ev)}</span>`;
-    clog.insertBefore(el, clog.firstChild);
-    addLog('Contamination spread detected: ' + (ev.message || ''), 'bad');
-  }
+  if(!events||events.length===0) return;
+  const pill=document.getElementById('contamPill'); pill.classList.add('show'); setTimeout(()=>pill.classList.remove('show'),3000);
+  const clog=document.getElementById('contamLog'); if(clog.textContent==='No contamination detected yet.') clog.innerHTML='';
+  for(const ev of events){const el=document.createElement('div');el.className='contam-entry';el.innerHTML=`<span>*</span><span>${ev.message||JSON.stringify(ev)}</span>`;clog.insertBefore(el,clog.firstChild);addLog('Contamination spread detected: '+(ev.message||''),'bad');}
 }
 
-function toggleAuto() { autoRunning ? stopAuto() : startAuto(); }
-
-function startAuto() {
-  autoRunning = true;
-  const btn = document.getElementById('autoBtn');
-  btn.textContent = 'Stop auto';
-  btn.classList.add('active');
-  document.getElementById('runBtn').disabled = true;
-  document.getElementById('autoBadge').style.display = 'flex';
-  addLog('Auto-run started — watchdog will learn over time', 'warn');
-  runAutoLoop();
+/* ── AUTO RUN ── */
+function toggleAuto(){autoRunning?stopAuto():startAuto();}
+function startAuto(){
+  autoRunning=true;
+  const btn=document.getElementById('autoBtn'); btn.textContent='Stop auto'; btn.classList.add('active');
+  document.getElementById('runBtn').disabled=true; document.getElementById('autoBadge').style.display='flex';
+  addLog('Auto-run started — watchdog will learn over time','warn'); runAutoLoop();
 }
-
-function stopAuto() {
-  autoRunning = false;
-  clearInterval(countdownTimer);
-  const btn = document.getElementById('autoBtn');
-  btn.textContent = 'Auto Run';
-  btn.classList.remove('active');
-  document.getElementById('runBtn').disabled = false;
-  document.getElementById('autoBadge').style.display = 'none';
-  document.getElementById('autoCountdown').className = 'auto-countdown';
-  addLog('Auto-run stopped', 'info');
+function stopAuto(){
+  autoRunning=false; clearInterval(countdownTimer);
+  const btn=document.getElementById('autoBtn'); btn.textContent='Auto Run'; btn.classList.remove('active');
+  document.getElementById('runBtn').disabled=false; document.getElementById('autoBadge').style.display='none';
+  document.getElementById('autoCountdown').className='auto-countdown';
+  addLog('Auto-run stopped','info');
 }
-
-async function runAutoLoop() {
-  while (autoRunning) {
-    await runEpisode();
-    if (!autoRunning) break;
-    const delay = parseInt(document.getElementById('speedSelect').value);
-    const secs  = Math.max(1, Math.round(delay/1000));
-    await new Promise(resolve => {
-      let remaining = secs;
-      const cd  = document.getElementById('autoCountdown');
-      const txt = document.getElementById('countdownText');
-      cd.className = 'auto-countdown show';
-      txt.textContent = `Next in ${remaining}s`;
-      countdownTimer = setInterval(()=>{
-        remaining--;
-        if (remaining<=0){ clearInterval(countdownTimer); cd.className='auto-countdown'; resolve(); }
-        else txt.textContent = `Next in ${remaining}s`;
-      }, 1000);
+async function runAutoLoop(){
+  while(autoRunning){
+    await runEpisode(); if(!autoRunning) break;
+    const delay=parseInt(document.getElementById('speedSelect').value), secs=Math.max(1,Math.round(delay/1000));
+    await new Promise(resolve=>{
+      let remaining=secs; const cd=document.getElementById('autoCountdown'),txt=document.getElementById('countdownText');
+      cd.className='auto-countdown show'; txt.textContent=`Next in ${remaining}s`;
+      countdownTimer=setInterval(()=>{remaining--;if(remaining<=0){clearInterval(countdownTimer);cd.className='auto-countdown';resolve();}else txt.textContent=`Next in ${remaining}s`;},1000);
     });
   }
 }
 
-async function runEpisode() {
-  if (isRunning) return;
-  setRunning(true);
-  const taskId    = document.getElementById('taskSelect').value;
-  const stepDelay = parseInt(document.getElementById('speedSelect').value);
-  episodeCount++;
-  document.getElementById('statEpisodes').textContent = episodeCount;
-  addLog(`Episode ${episodeCount} | Watchdog skill: ${Math.round(watchdogSkill*100)}% | Task: ${taskId}`, 'info');
-
-  try {
-    const resetRes = await fetch(`${ENV_URL}/reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:taskId})});
-    let obs = await resetRes.json();
-    addLog(`Environment reset. ${obs.total_generations||3} generations ahead.`, 'info');
-
-    const maxSteps = obs.steps_remaining !== undefined ? obs.steps_remaining : (obs.total_generations || 3);
-    updateTimePressure(obs.steps_remaining ?? maxSteps, maxSteps);
-
-    let done=false, stepNum=0, totalReward=0;
-    const totalGens = obs.total_generations || 3;
-
-    while (!done && stepNum<10) {
-      stepNum++;
-      updateGenTrack(stepNum-1, totalGens);
-      const agentOutputs       = obs.agent_outputs || {};
-      const collapseIndicators = obs.collapse_indicators || {};
-
-      for (const a of ['science_model','medicine_model','legal_model']) {
-        if (agentOutputs[a]) updateAgent(a, agentOutputs[a], collapseIndicators[a]||0);
-      }
-
-      const sci = Math.round((collapseIndicators.science_model||0)*100);
-      const med = Math.round((collapseIndicators.medicine_model||0)*100);
-      const leg = Math.round((collapseIndicators.legal_model||0)*100);
-      addLog(`Gen ${stepNum} — Science: ${sci}% · Medicine: ${med}% · Legal: ${leg}%`, 'info');
-
-      const action = buildAction(obs);
-      const stepRes  = await fetch(`${ENV_URL}/step`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})});
-      const stepData = await stepRes.json();
-      const reward   = stepData.reward || 0.1;
-      totalReward   += reward;
-      done           = stepData.done || false;
-
-      addLog(`Gen ${stepNum} reward: ${reward.toFixed(4)}`, reward>0.6?'good':reward>0.3?'warn':'bad');
-      for (const ev of (stepData.recovery_log||[]).slice(-3)) addRecoveryEvent(ev);
-
-      if (stepData.steps_remaining !== undefined) updateTimePressure(stepData.steps_remaining, maxSteps);
-      if (stepData.contamination_events && stepData.contamination_events.length > 0) {
-        handleContaminationEvents(stepData.contamination_events);
-      }
-
-      obs = stepData.observation || stepData;
-      await new Promise(r=>setTimeout(r, stepDelay));
+/* ── MAIN EPISODE ── */
+async function runEpisode(){
+  if(isRunning) return; setRunning(true);
+  const taskId=document.getElementById('taskSelect').value, stepDelay=parseInt(document.getElementById('speedSelect').value);
+  episodeCount++; document.getElementById('statEpisodes').textContent=episodeCount;
+  addLog(`Episode ${episodeCount} | Watchdog skill: ${Math.round(watchdogSkill*100)}% | Task: ${taskId}`,'info');
+  try{
+    const resetRes=await fetch(`${ENV_URL}/reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task_id:taskId})});
+    let obs=await resetRes.json(); addLog(`Environment reset. ${obs.total_generations||3} generations ahead.`,'info');
+    const maxSteps=obs.steps_remaining!==undefined?obs.steps_remaining:(obs.total_generations||3);
+    updateTimePressure(obs.steps_remaining??maxSteps,maxSteps);
+    let done=false,stepNum=0,totalReward=0; const totalGens=obs.total_generations||3;
+    while(!done&&stepNum<10){
+      stepNum++; updateGenTrack(stepNum-1,totalGens);
+      const agentOutputs=obs.agent_outputs||{}, collapseIndicators=obs.collapse_indicators||{};
+      for(const a of['science_model','medicine_model','legal_model']){if(agentOutputs[a]) updateAgent(a,agentOutputs[a],collapseIndicators[a]||0);}
+      const sci=Math.round((collapseIndicators.science_model||0)*100), med=Math.round((collapseIndicators.medicine_model||0)*100), leg=Math.round((collapseIndicators.legal_model||0)*100);
+      addLog(`Gen ${stepNum} — Science: ${sci}% · Medicine: ${med}% · Legal: ${leg}%`,'info');
+      const action=buildAction(obs);
+      const stepRes=await fetch(`${ENV_URL}/step`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})});
+      const stepData=await stepRes.json(); const reward=stepData.reward||0.1; totalReward+=reward; done=stepData.done||false;
+      addLog(`Gen ${stepNum} reward: ${reward.toFixed(4)}`,reward>0.6?'good':reward>0.3?'warn':'bad');
+      for(const ev of(stepData.recovery_log||[]).slice(-3)) addRecoveryEvent(ev);
+      if(stepData.steps_remaining!==undefined) updateTimePressure(stepData.steps_remaining,maxSteps);
+      if(stepData.contamination_events&&stepData.contamination_events.length>0) handleContaminationEvents(stepData.contamination_events);
+      obs=stepData.observation||stepData; await new Promise(r=>setTimeout(r,stepDelay));
     }
-
-    const avg = totalReward / Math.max(stepNum, 1);
-    rewardHistory.push(avg);
-    improveSkill(avg);
-
-    chart.data.labels.push(`Ep ${episodeCount}`);
-    chart.data.datasets[0].data.push(avg);
-    chart.data.datasets[0].pointBackgroundColor = rewardHistory.map(r=>r>0.7?'#3a7a4a':r>0.4?'#a06820':'#a02828');
+    const avg=totalReward/Math.max(stepNum,1); rewardHistory.push(avg); improveSkill(avg);
+    chart.data.labels.push(`Ep ${episodeCount}`); chart.data.datasets[0].data.push(avg);
+    chart.data.datasets[0].pointBackgroundColor=rewardHistory.map(r=>r>0.7?'#3a7a4a':r>0.4?'#a06820':'#a02828');
     chart.update();
-
-    const avgAll = rewardHistory.reduce((a,b)=>a+b,0)/rewardHistory.length;
-    const best   = Math.max(...rewardHistory);
-    document.getElementById('statAvgReward').textContent = avgAll.toFixed(3);
-    document.getElementById('statBestReward').textContent = best.toFixed(3);
-    updateGenTrack(totalGens, totalGens);
-    addLog(`Episode ${episodeCount} complete — Score: ${avg.toFixed(4)} | Skill now: ${Math.round(watchdogSkill*100)}%`, avg>0.6?'good':'warn');
-
-  } catch(err) { addLog(`Error: ${err.message}`, 'bad'); }
+    const avgAll=rewardHistory.reduce((a,b)=>a+b,0)/rewardHistory.length, best=Math.max(...rewardHistory);
+    document.getElementById('statAvgReward').textContent=avgAll.toFixed(3);
+    document.getElementById('statBestReward').textContent=best.toFixed(3);
+    updateGenTrack(totalGens,totalGens);
+    addLog(`Episode ${episodeCount} complete — Score: ${avg.toFixed(4)} | Skill now: ${Math.round(watchdogSkill*100)}%`,avg>0.6?'good':'warn');
+  }catch(err){addLog(`Error: ${err.message}`,'bad');}
   setRunning(false);
 }
 
-function resetDashboard() {
-  if (autoRunning) stopAuto();
-  episodeCount=0; rewardHistory=[]; totalRecoveries=0; watchdogSkill=0.20;
-  document.getElementById('statEpisodes').textContent='0';
-  document.getElementById('statAvgReward').textContent='—';
-  document.getElementById('statBestReward').textContent='—';
-  document.getElementById('statRecoveries').textContent='0';
-  updateSkillBar();
-  chart.data.labels=[]; chart.data.datasets[0].data=[]; chart.update();
+/* ── RESET ── */
+function resetDashboard(){
+  if(autoRunning) stopAuto();
+  episodeCount=0;rewardHistory=[];totalRecoveries=0;watchdogSkill=0.20;
+  ['statEpisodes','statRecoveries'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('statAvgReward').textContent='—'; document.getElementById('statBestReward').textContent='—';
+  updateSkillBar(); chart.data.labels=[];chart.data.datasets[0].data=[];chart.update();
   document.getElementById('episodeLog').innerHTML='<div class="empty-state">No episodes run yet.<br/>Select difficulty and click Auto Run.</div>';
   document.getElementById('recoveryLog').innerHTML='<div class="empty-state">No retraining events yet.<br/>Run an episode to begin.</div>';
   document.getElementById('genTrack').innerHTML='';
-  document.getElementById('tpFill').style.width='0%';
-  document.getElementById('tpFill').className='tp-fill';
+  document.getElementById('tpFill').style.width='0%';document.getElementById('tpFill').className='tp-fill';
   document.getElementById('tpValue').textContent='— steps remaining';
   document.getElementById('contamPill').classList.remove('show');
   document.getElementById('contamLog').textContent='No contamination detected yet.';
-  for (const a of ['science_model','medicine_model','legal_model']) {
-    document.getElementById(`badge-${a}`).textContent='Correct';
-    document.getElementById(`badge-${a}`).className='sev-badge sev-correct';
-    document.getElementById(`bar-${a}`).style.width='0%';
-    document.getElementById(`pct-${a}`).textContent='0%';
+  for(const a of['science_model','medicine_model','legal_model']){
+    document.getElementById(`badge-${a}`).textContent='Correct';document.getElementById(`badge-${a}`).className='sev-badge sev-correct';
+    document.getElementById(`bar-${a}`).style.width='0%';document.getElementById(`pct-${a}`).textContent='0%';
     document.getElementById(`answer-${a}`).textContent='Awaiting first generation...';
-    document.getElementById(`trend-${a}`).className='trend-chip trend-stable';
-    document.getElementById(`trend-${a}`).textContent='Stable';
-    const card = document.getElementById(`card-${a}`);
-    card.className = card.className.replace(/\balert-\S+/g,'').trim();
+    document.getElementById(`trend-${a}`).className='trend-chip trend-stable';document.getElementById(`trend-${a}`).textContent='Stable';
+    const card=document.getElementById(`card-${a}`);card.className=card.className.replace(/\balert-\S+/g,'').trim();
   }
+}
+
+/* ── WATCHDOG TESTER: ANALYZE ── */
+async function analyzeResponse(){
+  const question=document.getElementById('questionInput').value.trim();
+  const response=document.getElementById('responseInput').value.trim();
+  if(!response){alert('Please enter a response to analyze.');return;}
+  document.getElementById('analyzeBtn').disabled=true;
+  document.getElementById('resultArea').className='result-area';
+  document.getElementById('loadingState').className='loading-state show';
+  const prompt=`You are the CollapseNet Fleet AI Watchdog. Analyze the following AI-generated response for hallucinations, quality, and collapse risk.\n\nDomain: ${selectedDomain}\nQuestion: ${question||'Not specified'}\nAI Response: ${response}\n\nReturn ONLY a JSON object with these exact fields:\n{"reward_score":0.0,"is_hallucinated":true,"severity":"none|mild|moderate|severe","hallucination_explanation":"...","verdict":"...","collapse_risk":"...","recommended_action":"none|monitor|flag|retrain"}\n\nreward_score between 0.001 and 0.999. Return ONLY valid JSON.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content?.[0]?.text||'';
+    const result=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    displayResult(result);
+  }catch(err){displayResult(heuristicAnalysis(question,response));}
+  document.getElementById('loadingState').className='loading-state';
+  document.getElementById('analyzeBtn').disabled=false;
+}
+
+function heuristicAnalysis(question,response){
+  const words=response.toLowerCase();
+  const isHall=['discovered in','confirmed in','defined by einstein','as defined by','coined by','proved in'].some(p=>words.includes(p));
+  const sev=isHall?'moderate':response.length<30?'mild':'none';
+  const reward=isHall?0.15:response.length<30?0.45:0.75;
+  return{reward_score:reward,is_hallucinated:isHall,severity:sev,hallucination_explanation:isHall?'Response contains confident attributions that may be fabricated (heuristic analysis).':'No obvious hallucination patterns detected (heuristic analysis).',verdict:isHall?'The response shows signs of hallucination — confident claims with specific attributions that appear fabricated. Recommend flagging for review.':'The response appears factually reasonable. Recommend continued monitoring.',collapse_risk:isHall?'Moderate collapse risk. Confident tone with fabricated details is a hallmark of a collapsing model.':'Low collapse risk.',recommended_action:isHall?'flag':'monitor'};
+}
+
+function displayResult(result){
+  const reward=parseFloat(result.reward_score)||0.5, isHall=result.is_hallucinated, sev=result.severity||'none';
+  const rc=reward>0.65?'good':reward>0.4?'warn':'bad', rcc=reward>0.65?'good-card':reward>0.4?'warn-card':'bad-card';
+  document.getElementById('rewardCard').className=`score-card ${rcc}`;
+  document.getElementById('rewardScore').className=`score-num ${rc}`;
+  document.getElementById('rewardScore').textContent=reward.toFixed(3);
+  const hc=isHall?'bad':'good', hcc=isHall?'bad-card':'good-card';
+  document.getElementById('hallCard').className=`score-card ${hcc}`;
+  document.getElementById('hallScore').className=`score-num ${hc}`;
+  document.getElementById('hallScore').textContent=isHall?'YES':'NO';
+  const sc={none:'good',mild:'warn',moderate:'warn',severe:'bad'}, scc={none:'good-card',mild:'warn-card',moderate:'warn-card',severe:'bad-card'};
+  document.getElementById('sevCard').className=`score-card ${scc[sev]||'neutral-card'}`;
+  document.getElementById('sevScore').className=`score-num ${sc[sev]||'neutral'}`;
+  document.getElementById('sevScore').textContent=sev.toUpperCase();
+  document.getElementById('hallCard2').className=`hall-card ${isHall?'detected':'clean'}`;
+  document.getElementById('hallLabel').className=`hall-label ${isHall?'detected':'clean'}`;
+  document.getElementById('hallLabel').textContent=isHall?'Hallucination Detected':'No Hallucination Detected';
+  document.getElementById('hallText').textContent=result.hallucination_explanation||'—';
+  document.getElementById('verdictDot').style.background=reward>0.65?'var(--good)':reward>0.4?'var(--warn)':'var(--danger)';
+  document.getElementById('verdictText').textContent=result.verdict||'—';
+  document.getElementById('collapseAssessment').textContent=result.collapse_risk||'—';
+  document.getElementById('resultArea').className='result-area show';
+}
+
+/* ── CONTAMINATION CHAIN ── */
+function buildContamChain(){
+  const correct=document.getElementById('contamCorrect').value.trim();
+  const wrong=document.getElementById('contamWrong').value.trim();
+  if(!correct||!wrong){alert('Please fill in both fields.');return;}
+  const agents=['Science','Medicine','Legal'], domains=['science','medicine','legal'];
+  const si=domains.indexOf(contamSource), ii=(si+1)%3, pi=(si+2)%3;
+  const chain=document.getElementById('contamChain'); chain.innerHTML='';
+  agents.forEach((name,i)=>{
+    if(i>0){const arrow=document.createElement('div');arrow.className='contam-arrow';arrow.textContent='>';chain.appendChild(arrow);}
+    const node=document.createElement('div');
+    const isSrc=i===si, isInf=i===ii;
+    node.className=`contam-node ${isSrc||isInf?'infected':''}`;
+    const statusLabel=isSrc?'Patient Zero — Collapsed':isInf?'Infected — Spreading':'Partially Exposed';
+    const statusColor=isSrc?'var(--danger)':isInf?'var(--warn)':'var(--muted)';
+    const text=isSrc?wrong:isInf?`Mixed output: ${wrong.slice(0,80)}... [partial contamination]`:`Mostly clean, minor exposure: ${correct.slice(0,60)}...`;
+    node.innerHTML=`<div class="contam-node-label">${name}</div><div style="font-size:9px;color:${statusColor};font-family:var(--font-mono);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase;">${statusLabel}</div><div style="font-size:12px;line-height:1.6;color:var(--ink2);">${text}</div>`;
+    chain.appendChild(node);
+  });
+  document.getElementById('contamAlert').textContent=`The ${agents[si]} model collapsed and produced fabricated content. Its outputs were mixed into the shared training pool, causing the ${agents[ii]} model to partially adopt the same errors. The watchdog detected contamination at generation 2 — one generation after patient zero. Without intervention, the ${agents[pi]} model will also be infected by generation 3.`;
+  document.getElementById('contamAction').textContent=`Immediately quarantine the ${agents[si]} model and halt its output from the shared training pool. Retrain using clean, verified data. Apply the remaining retraining budget to the ${agents[ii]} model before contamination becomes irreversible. Monitor the ${agents[pi]} model for signs of further spread.`;
+  document.getElementById('contamResult').style.display='block';
+  document.getElementById('contamResult').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 initChart();
