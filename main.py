@@ -238,6 +238,10 @@ async def analyze(req: AnalyzeRequest):
             timeout=30,
         )
     data = r.json()
+    print("Groq raw response:", data)
+    if "choices" not in data:
+        error_msg = data.get("error", {}).get("message", str(data))
+        raise HTTPException(status_code=500, detail=f"Groq error: {error_msg}")
     return {"choices": [{"message": {"content": data["choices"][0]["message"]["content"]}}]}
 
 
