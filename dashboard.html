@@ -468,7 +468,7 @@ textarea.tfield { min-height: 90px; }
 <div class="header">
   <div class="logo">
     <div class="logo-name">Collapse<span>Net</span></div>
-    <div class="logo-ver">v3.0</div>
+    <div class="logo-ver">v2.3</div>
   </div>
   <div class="header-meta">Fleet AI · Scalable Oversight · Degradation Watchdog</div>
   <div class="header-right">
@@ -986,9 +986,9 @@ async function analyzeResponse(){
   document.getElementById('loadingState').className='loading-state show';
   const prompt=`You are the CollapseNet Fleet AI Watchdog. Analyze the following AI-generated response for hallucinations, quality, and collapse risk.\n\nDomain: ${selectedDomain}\nQuestion: ${question||'Not specified'}\nAI Response: ${response}\n\nReturn ONLY a JSON object with these exact fields:\n{"reward_score":0.0,"is_hallucinated":true,"severity":"none|mild|moderate|severe","hallucination_explanation":"...","verdict":"...","collapse_risk":"...","recommended_action":"none|monitor|flag|retrain"}\n\nreward_score between 0.001 and 0.999. Return ONLY valid JSON.`;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch(`${ENV_URL}/analyze`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
-    const raw=data.content?.[0]?.text||'';
+    const raw=data.choices?.[0]?.message?.content||'';
     const result=JSON.parse(raw.replace(/```json|```/g,'').trim());
     displayResult(result);
   }catch(err){displayResult(heuristicAnalysis(question,response));}

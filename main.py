@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Any, Optional
 import uvicorn
+import httpx
 
 from environment import CollapseNetEnv, TASK_IDS
 
@@ -27,6 +28,8 @@ app.add_middleware(
 
 env = CollapseNetEnv()
 
+OPENAI_API_KEY = "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"
+
 
 class ResetRequest(BaseModel):
     task_id: Optional[str] = "easy"
@@ -43,6 +46,10 @@ class MCPRequest(BaseModel):
     params: Optional[Any] = None
 
 
+class AnalyzeRequest(BaseModel):
+    messages: list[dict]
+
+
 @app.get("/")
 def root():
     return {
@@ -57,7 +64,7 @@ def root():
         ),
         "tasks": TASK_IDS,
         "model_agents": ["science_model", "medicine_model", "legal_model"],
-        "endpoints": ["/reset", "/step", "/state", "/tasks", "/health", "/metadata", "/schema", "/mcp", "/docs"],
+        "endpoints": ["/reset", "/step", "/state", "/tasks", "/health", "/metadata", "/schema", "/mcp", "/analyze", "/docs"],
         "themes": [
             "Theme #1 — Fleet AI Sub-theme: Scalable Oversight across 3 simultaneous AI agents",
             "Theme #1 — Cross-Agent Contamination: collapsed agents spread degradation to others",
@@ -211,6 +218,25 @@ def state():
 @app.get("/dashboard")
 def dashboard():
     return FileResponse("dashboard.html")
+
+
+@app.post("/analyze")
+async def analyze(req: AnalyzeRequest):
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "gpt-4o-mini",
+                "messages": req.messages,
+                "max_tokens": 1000,
+            },
+            timeout=30,
+        )
+    return r.json()
 
 
 if __name__ == "__main__":
