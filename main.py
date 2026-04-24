@@ -28,7 +28,7 @@ app.add_middleware(
 
 env = CollapseNetEnv()
 
-GEMINI_API_KEY = "AIzaSyB-l5Yo_vQo-wHlxP46wTmMadVPnICkQEI"
+GROQ_API_KEY = "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"
 
 
 class ResetRequest(BaseModel):
@@ -222,39 +222,23 @@ def dashboard():
 
 @app.post("/analyze")
 async def analyze(req: AnalyzeRequest):
-    """
-    Proxy to Gemini API — keeps key server-side,
-    returns OpenAI-compatible shape so dashboard works unchanged.
-    """
     user_msg = req.messages[0].get("content", "") if req.messages else ""
     async with httpx.AsyncClient() as client:
         r = await client.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}",
-            headers={"Content-Type": "application/json"},
-            json={"contents": [{"parts": [{"text": user_msg}]}]},
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "llama3-8b-8192",
+                "messages": [{"role": "user", "content": user_msg}],
+                "max_tokens": 1000,
+            },
             timeout=30,
         )
     data = r.json()
-    print("Gemini raw response:", data)
-
-    if "candidates" not in data:
-        error_msg = data.get("error", {}).get("message", str(data))
-        raise HTTPException(status_code=500, detail=f"Gemini error: {error_msg}")
-
-    candidates = data["candidates"]
-    if not candidates:
-        raise HTTPException(status_code=500, detail="Gemini returned no candidates")
-
-    content = candidates[0].get("content", {})
-    parts = content.get("parts", [])
-    if not parts:
-        raise HTTPException(status_code=500, detail="Gemini returned empty parts")
-
-    text = parts[0].get("text", "")
-    if not text:
-        raise HTTPException(status_code=500, detail="Gemini returned empty text")
-
-    return {"choices": [{"message": {"content": text}}]}
+    return {"choices": [{"message": {"content": data["choices"][0]["message"]["content"]}}]}
 
 
 if __name__ == "__main__":
