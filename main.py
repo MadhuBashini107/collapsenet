@@ -28,7 +28,8 @@ app.add_middleware(
 
 env = CollapseNetEnv()
 
-OPENAI_API_KEY = "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"
+# Paste your Gemini API key here (get free key at https://aistudio.google.com/app/apikey)
+GEMINI_API_KEY = "AIzaSyB-l5Yo_vQo-wHlxP46wTmMadVPnICkQEI"
 
 
 class ResetRequest(BaseModel):
@@ -222,21 +223,26 @@ def dashboard():
 
 @app.post("/analyze")
 async def analyze(req: AnalyzeRequest):
+    """
+    Proxy to Gemini API — keeps API key server-side, returns
+    OpenAI-compatible response shape so dashboard works unchanged.
+    """
+    user_msg = req.messages[0].get("content", "") if req.messages else ""
     async with httpx.AsyncClient() as client:
         r = await client.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENAI_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "gpt-4o-mini",
-                "messages": req.messages,
-                "max_tokens": 1000,
-            },
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}",
+            headers={"Content-Type": "application/json"},
+            json={"contents": [{"parts": [{"text": user_msg}]}]},
             timeout=30,
         )
-    return r.json()
+    data = r.json()
+    # Extract text from Gemini response
+    try:
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError):
+        raise HTTPException(status_code=500, detail=f"Gemini error: {data}")
+    # Return in OpenAI-compatible shape so dashboard needs no changes
+    return {"choices": [{"message": {"content": text}}]}
 
 
 if __name__ == "__main__":
