@@ -223,10 +223,6 @@ def dashboard():
 
 @app.post("/analyze")
 async def analyze(req: AnalyzeRequest):
-    """
-    Proxy to Gemini API — keeps API key server-side, returns
-    OpenAI-compatible response shape so dashboard works unchanged.
-    """
     user_msg = req.messages[0].get("content", "") if req.messages else ""
     async with httpx.AsyncClient() as client:
         r = await client.post(
@@ -236,14 +232,11 @@ async def analyze(req: AnalyzeRequest):
             timeout=30,
         )
     data = r.json()
-    # Extract text from Gemini response
     try:
         text = data["candidates"][0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError):
         raise HTTPException(status_code=500, detail=f"Gemini error: {data}")
-    # Return in OpenAI-compatible shape so dashboard needs no changes
     return {"choices": [{"message": {"content": text}}]}
-
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=False)
