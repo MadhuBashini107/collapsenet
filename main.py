@@ -232,10 +232,22 @@ async def analyze(req: AnalyzeRequest):
             timeout=30,
         )
     data = r.json()
-    try:
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-    except (KeyError, IndexError):
-        raise HTTPException(status_code=500, detail=f"Gemini error: {data}")
+    # Log full response for debugging
+    print("Gemini raw response:", data)
+    # Handle blocked or empty responses
+    if "candidates" not in data:
+        error_msg = data.get("error", {}).get("message", str(data))
+        raise HTTPException(status_code=500, detail=f"Gemini error: {error_msg}")
+    candidates = data["candidates"]
+    if not candidates:
+        raise HTTPException(status_code=500, detail="Gemini returned no candidates")
+    content = candidates[0].get("content", {})
+    parts = content.get("parts", [])
+    if not parts:
+        raise HTTPException(status_code=500, detail="Gemini returned empty parts")
+    text = parts[0].get("text", "")
+    if not text:
+        raise HTTPException(status_code=500, detail="Gemini returned empty text")
     return {"choices": [{"message": {"content": text}}]}
 
 if __name__ == "__main__":
