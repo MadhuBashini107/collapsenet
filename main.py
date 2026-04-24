@@ -28,7 +28,6 @@ app.add_middleware(
 
 env = CollapseNetEnv()
 
-# Paste your Gemini API key here (get free key at https://aistudio.google.com/app/apikey)
 GEMINI_API_KEY = "AIzaSyB-l5Yo_vQo-wHlxP46wTmMadVPnICkQEI"
 
 
@@ -223,32 +222,40 @@ def dashboard():
 
 @app.post("/analyze")
 async def analyze(req: AnalyzeRequest):
+    """
+    Proxy to Gemini API — keeps key server-side,
+    returns OpenAI-compatible shape so dashboard works unchanged.
+    """
     user_msg = req.messages[0].get("content", "") if req.messages else ""
     async with httpx.AsyncClient() as client:
         r = await client.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}",
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}",
             headers={"Content-Type": "application/json"},
             json={"contents": [{"parts": [{"text": user_msg}]}]},
             timeout=30,
         )
     data = r.json()
-    # Log full response for debugging
     print("Gemini raw response:", data)
-    # Handle blocked or empty responses
+
     if "candidates" not in data:
         error_msg = data.get("error", {}).get("message", str(data))
         raise HTTPException(status_code=500, detail=f"Gemini error: {error_msg}")
+
     candidates = data["candidates"]
     if not candidates:
         raise HTTPException(status_code=500, detail="Gemini returned no candidates")
+
     content = candidates[0].get("content", {})
     parts = content.get("parts", [])
     if not parts:
         raise HTTPException(status_code=500, detail="Gemini returned empty parts")
+
     text = parts[0].get("text", "")
     if not text:
         raise HTTPException(status_code=500, detail="Gemini returned empty text")
+
     return {"choices": [{"message": {"content": text}}]}
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=7860, reload=False)
