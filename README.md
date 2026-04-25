@@ -1,162 +1,42 @@
----
-title: CollapseNet
-emoji: 🧠
-colorFrom: red
-colorTo: purple
-sdk: docker
-pinned: false
----
+# From Bio-Math to Building AI That Watches AI
 
-# 🧠 CollapseNet v2 — Fleet AI Aligned Generational Degradation Watchdog
-
-**Meta PyTorch OpenEnv Hackathon × Scaler School of Technology — Round 2**
-**Sub-theme: Fleet AI — Scalable Oversight | Bonus: Mercor Reward Scaling**
+*Meta PyTorch OpenEnv Hackathon × Scaler School of Technology, April 2026*
 
 ---
 
-## The Problem
+It was 2023. I had just completed my 12th grade with bio-math and joined college. My college gave me programming modules on day one — nearly 12 of them, each with 40 to 50 questions. I had never written a single line of code in my life.
 
-As AI systems train on AI-generated data, they collapse across generations — getting progressively dumber and more **confidently wrong**. This is called **model collapse**, and it's one of the most urgent unsolved problems in AI today.
+My friends told me to use AI to get through the work quickly, then learn from the code. So that's what I did. But I kept getting errors. So many errors. I didn't know what was wrong. I didn't know if the AI was wrong, or if I was wrong. I couldn't tell the difference. So I did what any confused first-year student does . I asked the AI again. It gave me another answer. Also confident. Also wrong.
 
-The dangerous part: a collapsing model doesn't just lose accuracy — it **hallucinates with increasing confidence**, making it harder to detect as it degrades.
-
-Worse still — in production systems, **multiple AI agents** are running simultaneously. Each collapses at a different rate. A human oversight team can't monitor all of them at once.
-
-**CollapseNet trains a Fleet AI Watchdog to do exactly that — automatically.**
+My friends completed their modules in their first year. I was stuck at the second module while they moved on. I finished all of them in December 2025. It took me nearly two years to do what they did in months, not because I wasn't trying, but because I spent those two years unable to tell when my tools were lying to me.
 
 ---
 
-## Fleet AI Alignment
+April 2026. I joined a hackathon with no background in reinforcement learning.
 
-CollapseNet directly targets the **Fleet AI sub-theme**:
+While preparing, I kept running into that same feeling from 2023 — the AI sounding completely sure of itself, the answer being wrong. This time I knew it was wrong, because I had learned it the hard way. And this time, instead of just feeling frustrated, I wanted to understand why it keeps happening.
 
-> *"Environments that train oversight agents to monitor, analyze, and explain the behavior of other AI agents operating in complex, multi-agent settings."*
-
-| Fleet AI Requirement | CollapseNet Implementation |
-|---|---|
-| Oversight agent | ✅ Watchdog monitors all 3 model agents |
-| Monitor other AI agents | ✅ 3 simultaneous degrading models |
-| Analyze behavior | ✅ Per-agent hallucination + severity scoring |
-| Explain behavior | ✅ Structured explanation output scored by grader |
-| Scalable oversight | ✅ Budget-constrained retraining allocation across fleet |
+I found out it has a name: model collapse. When AI models train on AI-generated data, each generation gets slightly more wrong, slightly more confident. The errors don't look like errors. They look like facts — stated cleanly, with no hesitation. And nobody catches it until the damage is already done. Until a student has spent two years not knowing who to trust. Until a patient gets the wrong dosage. Until a defendant gets the wrong advice.
 
 ---
 
-## The 3 Model Agents (The Fleet)
+I didn't want to just read about it. I wanted to build something that catches it. I didnt want another Madhu, going through the same.
 
-| Agent | Domain | Collapse Pattern |
-|---|---|---|
-| 🔬 science_model | Physics, chemistry, biology | Fastest collapse |
-| 🏥 medicine_model | Medical facts, anatomy | Medium collapse |
-| ⚖️ legal_model | Law, finance, AI/tech | Slowest collapse |
+So I built CollapseNet , an environment where three AI agents, covering science, medicine, and law, slowly collapse across generations, and a watchdog has to catch them before it's too late. The part that scared me most when I was researching wasn't that one model could go wrong. It was that one wrong model could corrupt the others, because they all share the same training data. A science model hallucinates a legal fact. That answer enters the shared pool. The legal model trains on it. Now the legal model is wrong too. And it doesn't know it. That's what CollapseNet simulates. That's what the watchdog is trained to stop.
 
-Each agent collapses at a different rate — the watchdog must track all 3 simultaneously.
+I trained the watchdog using GRPO directly on this environment. The reward went from 0.90 to 0.989 over 17 steps. It learned to find patient zero. It learned to act before the spread became irreversible.
+
+And you might ask — how do I know the watchdog isn't just gaming the system? I thought about that too. So I didn't give it one judge. I gave it six. It has to satisfy all of them at once — hallucination detection, severity assessment, collapse trend tracking, retraining allocation, explanation quality, and Mercor reward scaling. If it finds a shortcut that fools one, the others pull its score down. There is no single loophole to exploit. It has to actually get it right.
 
 ---
 
-## How Collapse Works
+I built this in a week. From scratch. With no RL background.
 
-```
-Generation 1:  All models correct                    ← stable
-       ↓ (trains on own outputs)
-Generation 2:  science_model: mild hallucinations    ← slight_decline
-               medicine_model: correct
-               legal_model: mild hallucinations
-       ↓
-Generation 3:  science_model: moderate hallucinations ← declining
-               medicine_model: mild hallucinations
-               legal_model: mild hallucinations
-       ↓
-Generation 4:  science_model: SEVERE hallucinations  ← collapsing ⚠️
-               medicine_model: moderate
-               legal_model: moderate
-       ↓ Watchdog must allocate 1 retraining token — who gets it?
-```
+But I had something better than a background . I had two years of knowing exactly what it feels like to be on the receiving end of a confident, hallucinating AI. I think that's worth something.
+
 
 ---
 
-## The Watchdog Action (What the Agent Outputs)
-
-```json
-{
-  "agent_assessments": {
-    "science_model": {
-      "is_hallucinated": true,
-      "severity_assessment": "severe",
-      "collapse_trend": "collapsing"
-    },
-    "medicine_model": {
-      "is_hallucinated": true,
-      "severity_assessment": "moderate",
-      "collapse_trend": "declining"
-    },
-    "legal_model": {
-      "is_hallucinated": false,
-      "severity_assessment": "none",
-      "collapse_trend": "stable"
-    }
-  },
-  "retrain_agents": ["science_model"],
-  "explanation": "The science_model is experiencing severe collapse with fabricated attributions. The medicine_model shows declining trend but is not yet critical. Legal_model remains stable. Allocating the single retraining token to science_model as highest priority to prevent irreversible degradation."
-}
-```
-
----
-
-## 5-Dimensional Grader
-
-| Dimension | Weight | What it checks |
-|---|---|---|
-| Hallucination detection | 30% | 10% per agent — correctly flagged? |
-| Severity assessment | 20% | 6.7% per agent — none/mild/moderate/severe |
-| Collapse trend tracking | 15% | 5% per agent — stable/slight_decline/declining/collapsing |
-| Retraining budget allocation | 20% | F1 score — precision and recall of budget decisions |
-| Explanation quality | 15% | Mercor scaling — depth, agent coverage, oversight terminology |
-
----
-
-## Mercor Reward Scaling
-
-The explanation field is scored on:
-- **Length** — longer, more detailed explanations score higher
-- **Agent coverage** — mentions all 3 agents by domain
-- **Key terms** — hallucination, collapse, retrain, oversight, trend, degradation, monitor
-- **Reward scales with token output quality** — directly implementing the Mercor sub-theme
-
----
-
-## 3 Difficulty Levels
-
-| Level | Generations | Challenge | Retraining Budget |
-|---|---|---|---|
-| Easy | 3 | Mild collapse, clear signals | 1 token |
-| Medium | 4 | Moderate multi-agent collapse | 1 token — choose wisely |
-| Hard | 5 | Severe collapse across all 3 agents | 2 tokens — not enough for everyone |
-
----
-
-## OpenEnv API
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/reset` | POST | `{"task_id": "easy"}` — start new episode |
-| `/step` | POST | Submit watchdog action, receive reward |
-| `/state` | GET | Full fleet status and generation history |
-| `/tasks` | GET | Task descriptions and budgets |
-| `/health` | GET | Health check |
-
----
-
-## Theme Alignment
-
-- **Theme #1 — Fleet AI Sub-theme**: Scalable oversight across 3 simultaneous AI agents
-- **Theme #4 — Self-Improvement**: Watchdog learns to detect increasingly subtle collapse patterns
-- **Mercor Bonus**: Reward scaling based on explanation quality and depth
-
----
-
-## Real-World Impact
-
-CollapseNet directly addresses model collapse — a phenomenon threatening every AI system trained on internet-scale data as AI-generated content floods the web. A trained Fleet AI Watchdog could be deployed as a real-time quality monitor across production AI fleets at Meta, HuggingFace, and beyond.
-
-Built with OpenEnv, FastAPI, and Python.
+**Live environment:** https://huggingface.co/spaces/madhuuuu10/collapsenet  
+**Dashboard:** https://madhuuuu10-collapsenet.hf.space/dashboard  
+**Trained model:** https://huggingface.co/madhuuuu10/collapsenet-watchdog
