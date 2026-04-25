@@ -1,0 +1,52 @@
+name: CollapseNet v3
+version: 3.0.0
+description: >
+  3 domain AI agents (science, medicine, legal) collapse simultaneously across
+  generations with cross-agent contamination spread. A Fleet AI Watchdog monitors
+  all 3, detects hallucinations, tracks per-agent collapse trends, allocates
+  retraining budget under time pressure, and produces structured oversight
+  explanations scored by Mercor reward scaling.
+
+author: madhuuuu10
+space_url: https://huggingface.co/spaces/madhuuuu10/collapsenet
+environment_url: https://madhuuuu10-collapsenet.hf.space
+
+themes:
+  - Fleet AI — Scalable Oversight
+  - Self-Improvement
+
+tasks:
+  - id: easy
+    description: 5 steps, single agent collapse, no contamination
+  - id: medium
+    description: 6 steps, two agents affected, contamination possible
+  - id: hard
+    description: 7 steps, all agents at risk, contamination active from start
+
+agents:
+  - science_model
+  - medicine_model
+  - legal_model
+
+api:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
+  health: GET /health
+  metadata: GET /metadata
+  schema: GET /schema
+  tasks: GET /tasks
+  mcp: GET /mcp
+
+reward:
+  hallucination_detection: 30%
+  severity_assessment: 20%
+  collapse_trend_tracking: 15%
+  retraining_allocation: 20%
+  explanation_quality: 15%
+
+training:
+  framework: TRL GRPOTrainer + Unsloth
+  model: Qwen/Qwen2.5-0.5B-Instruct
+  adapter: https://huggingface.co/madhuuuu10/collapsenet-watchdog
+  reward_improvement: "0.90 → 0.99 over 18 steps"
