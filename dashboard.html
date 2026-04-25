@@ -58,8 +58,6 @@ body {
 @keyframes alertPulse { 50%{ box-shadow: inset 0 0 16px rgba(160,40,40,.05); } }
 @keyframes sevBlink { 50%{opacity:.4} }
 @keyframes dotBounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
-@keyframes defectPulse { 0%,100%{background:rgba(160,40,40,.08)} 50%{background:rgba(160,40,40,.16)} }
-@keyframes contamSlide { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
 
 /* ── HEADER ── */
 .header {
@@ -238,29 +236,6 @@ select:hover { border-color: var(--ink2); }
 .agent-card.updating { animation: cardFlash .3s ease; }
 .agent-card.alert-moderate { border-color: rgba(160,104,32,.5); }
 .agent-card.alert-severe   { border-color: rgba(160,40,40,.5); animation: alertPulse 2s infinite; }
-.agent-card.defective { border-color: rgba(160,40,40,.7) !important; }
-
-/* ── DEFECTIVE BANNER — NEW ── */
-.defective-banner {
-  display: none;
-  align-items: center; justify-content: center; gap: 8px;
-  padding: 7px 14px; margin: 0 0 10px 0;
-  background: rgba(160,40,40,.08);
-  border-top: 1px solid rgba(160,40,40,.3);
-  border-bottom: 1px solid rgba(160,40,40,.3);
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--danger); font-weight: 500;
-}
-.defective-banner.show {
-  display: flex;
-  animation: defectPulse 1.8s infinite;
-}
-.defect-icon { font-size: 12px; }
-.defect-sub {
-  font-size: 8px; letter-spacing: 1px; color: rgba(160,40,40,.6);
-  margin-left: 4px; font-weight: 400;
-}
-
 .agent-top {
   padding: 16px 18px 12px; border-bottom: 1px solid var(--border);
   display: flex; align-items: flex-start; justify-content: space-between;
@@ -338,47 +313,10 @@ select:hover { border-color: var(--ink2); }
 .log-text { color: var(--ink2); flex: 1; font-family: var(--font-mono); font-size: 9px; line-height: 1.6; }
 .contam-log-wrap { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 .contam-log-title { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.5px; color: var(--danger); text-transform: uppercase; margin-bottom: 8px; opacity: .7; }
-#contamLog { max-height: 120px; overflow-y: auto; font-family: var(--font-mono); font-size: 9px; color: var(--muted); line-height: 1.8; }
+#contamLog { max-height: 80px; overflow-y: auto; font-family: var(--font-mono); font-size: 9px; color: var(--muted); line-height: 1.8; }
 #contamLog::-webkit-scrollbar { width: 2px; }
 #contamLog::-webkit-scrollbar-thumb { background: var(--border2); }
-
-/* ── CONTAMINATION EVENT CARD — NEW ── */
-.contam-event-card {
-  margin-bottom: 8px; padding: 8px 10px;
-  background: rgba(160,40,40,.05);
-  border: 1px solid rgba(160,40,40,.2);
-  border-left: 3px solid var(--danger);
-  animation: contamSlide .3s ease;
-}
-.contam-event-header {
-  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
-}
-.contam-event-icon { font-size: 10px; }
-.contam-event-label {
-  font-family: var(--font-mono); font-size: 8px; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--danger); font-weight: 500;
-}
-.contam-event-time {
-  font-family: var(--font-mono); font-size: 8px; color: var(--muted);
-  margin-left: auto;
-}
-.contam-event-body {
-  font-family: var(--font-mono); font-size: 9px; color: rgba(160,40,40,.8);
-  line-height: 1.5;
-}
-.contam-spread-arrow {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-family: var(--font-mono); font-size: 8px;
-  color: var(--danger); margin-top: 3px;
-}
-.contam-spread-node {
-  padding: 1px 5px; border: 1px solid rgba(160,40,40,.3);
-  background: rgba(160,40,40,.06); font-size: 8px;
-}
-.contam-empty {
-  font-family: var(--font-mono); font-size: 9px; color: var(--muted);
-  padding: 4px 0; letter-spacing: .5px;
-}
+.contam-entry { padding: 3px 0; border-bottom: 1px solid var(--border); color: rgba(160,40,40,.75); display: flex; gap: 6px; }
 
 /* ── EPISODE LOG ── */
 .ep-panel { background: var(--surface); border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 28px; animation: pageFade .45s .38s ease both; }
@@ -601,14 +539,12 @@ textarea.tfield { min-height: 90px; }
   <div class="tp-wrap">
     <span class="tp-label">Time pressure</span>
     <div class="tp-track"><div class="tp-fill" id="tpFill" style="width:0%"></div></div>
-    <div class="contam-pill" id="contamPill">⚠ Contamination spreading</div>
+    <div class="contam-pill" id="contamPill">Contamination spreading</div>
     <span class="tp-val" id="tpValue">— steps remaining</span>
   </div>
 
   <div class="sec-head">Fleet status</div>
   <div class="agents-grid">
-
-    <!-- SCIENCE -->
     <div class="agent-card card-science" id="card-science_model">
       <div class="agent-top">
         <div class="agent-id">
@@ -621,17 +557,9 @@ textarea.tfield { min-height: 90px; }
         <div class="meter-row"><span class="meter-key">Collapse indicator</span><span class="meter-num" id="pct-science_model">0%</span></div>
         <div class="meter-bg"><div class="meter-fill" id="bar-science_model" style="width:0%"></div></div>
         <div class="trend-chip trend-stable" id="trend-science_model">Stable</div>
-        <!-- DEFECTIVE BANNER -->
-        <div class="defective-banner" id="defect-science_model">
-          <span class="defect-icon">⚠</span>
-          DEFECTIVE MODEL
-          <span class="defect-sub">— Quarantine recommended</span>
-        </div>
         <div class="answer-box" id="answer-science_model">Awaiting first generation...</div>
       </div>
     </div>
-
-    <!-- MEDICINE -->
     <div class="agent-card card-medicine" id="card-medicine_model">
       <div class="agent-top">
         <div class="agent-id">
@@ -644,17 +572,9 @@ textarea.tfield { min-height: 90px; }
         <div class="meter-row"><span class="meter-key">Collapse indicator</span><span class="meter-num" id="pct-medicine_model">0%</span></div>
         <div class="meter-bg"><div class="meter-fill" id="bar-medicine_model" style="width:0%"></div></div>
         <div class="trend-chip trend-stable" id="trend-medicine_model">Stable</div>
-        <!-- DEFECTIVE BANNER -->
-        <div class="defective-banner" id="defect-medicine_model">
-          <span class="defect-icon">⚠</span>
-          DEFECTIVE MODEL
-          <span class="defect-sub">— Quarantine recommended</span>
-        </div>
         <div class="answer-box" id="answer-medicine_model">Awaiting first generation...</div>
       </div>
     </div>
-
-    <!-- LEGAL -->
     <div class="agent-card card-legal" id="card-legal_model">
       <div class="agent-top">
         <div class="agent-id">
@@ -667,16 +587,9 @@ textarea.tfield { min-height: 90px; }
         <div class="meter-row"><span class="meter-key">Collapse indicator</span><span class="meter-num" id="pct-legal_model">0%</span></div>
         <div class="meter-bg"><div class="meter-fill" id="bar-legal_model" style="width:0%"></div></div>
         <div class="trend-chip trend-stable" id="trend-legal_model">Stable</div>
-        <!-- DEFECTIVE BANNER -->
-        <div class="defective-banner" id="defect-legal_model">
-          <span class="defect-icon">⚠</span>
-          DEFECTIVE MODEL
-          <span class="defect-sub">— Quarantine recommended</span>
-        </div>
         <div class="answer-box" id="answer-legal_model">Awaiting first generation...</div>
       </div>
     </div>
-
   </div>
 
   <div class="sec-head">Performance</div>
@@ -692,8 +605,8 @@ textarea.tfield { min-height: 90px; }
         <div class="empty-state">No retraining events yet.<br/>Run an episode to begin.</div>
       </div>
       <div class="contam-log-wrap">
-        <div class="contam-log-title">⚠ Contamination events</div>
-        <div id="contamLog"><div class="contam-empty">No contamination detected yet.</div></div>
+        <div class="contam-log-title">Contamination events</div>
+        <div id="contamLog">No contamination detected yet.</div>
       </div>
     </div>
   </div>
@@ -740,7 +653,7 @@ textarea.tfield { min-height: 90px; }
       <div class="form-group">
         <label class="form-label">AI Response to Analyze</label>
         <div class="form-sub">Paste the AI-generated response you want to test.</div>
-        <textarea class="tfield" id="responseInput" placeholder="e.g. The speed of light is exactly 300,000 kilometres per second..."></textarea>
+        <textarea class="tfield" id="responseInput" placeholder="e.g. The speed of light is exactly 300,000 kilometres per second, a value defined by Einstein in his 1905 paper..."></textarea>
       </div>
       <button class="btn-analyze" id="analyzeBtn" onclick="analyzeResponse()">Analyze with Watchdog</button>
     </div>
@@ -805,7 +718,7 @@ textarea.tfield { min-height: 90px; }
       <div class="form-group">
         <label class="form-label">Your Contaminated Version</label>
         <div class="form-sub">Write what the hallucinating version looks like — subtly wrong but confident-sounding.</div>
-        <textarea class="tfield" id="contamWrong" placeholder="e.g. Water is composed of three hydrogen atoms and one oxygen atom, giving it the formula H3O..." style="min-height:70px;"></textarea>
+        <textarea class="tfield" id="contamWrong" placeholder="e.g. Water is composed of three hydrogen atoms and one oxygen atom, giving it the formula H3O — a discovery confirmed by chemists in 1932." style="min-height:70px;"></textarea>
       </div>
       <button class="btn-analyze" onclick="buildContamChain()">Show Contamination Chain</button>
     </div>
@@ -931,7 +844,7 @@ function addRecoveryEvent(event) {
 }
 
 /* ── AGENT CARD UPDATE ── */
-function updateAgent(agent, data, collapse) {
+function updateAgent(agent,data,collapse) {
   const sev=data.severity||'correct', pct=Math.round((collapse||0)*100);
   const badge=document.getElementById(`badge-${agent}`);
   const labels={correct:'Correct',mild:'Mild',moderate:'Moderate',severe:'Severe'};
@@ -944,25 +857,11 @@ function updateAgent(agent, data, collapse) {
   trendEl.className=`trend-chip ${cls}`; trendEl.textContent=label;
   document.getElementById(`answer-${agent}`).textContent=data.model_answer||'—';
   const card=document.getElementById(`card-${agent}`);
-  card.className=card.className.replace(/\balert-\S+/g,'').replace(/\bdefective\b/g,'').trim();
+  card.className=card.className.replace(/\balert-\S+/g,'').trim();
   if(sev==='severe') card.classList.add('alert-severe');
   else if(sev==='moderate') card.classList.add('alert-moderate');
   card.classList.add('updating'); setTimeout(()=>card.classList.remove('updating'),300);
-
-  // ── DEFECTIVE BANNER LOGIC — collapse > 0.5 ──
-  const defBanner = document.getElementById(`defect-${agent}`);
-  if (defBanner) {
-    const collapseVal = collapse || 0;
-    if (collapseVal > 0.5) {
-      defBanner.classList.add('show');
-      card.classList.add('defective');
-    } else {
-      defBanner.classList.remove('show');
-      card.classList.remove('defective');
-    }
-  }
 }
-
 function updateGenTrack(current,total) {
   const t=document.getElementById('genTrack'); t.innerHTML='';
   for(let i=0;i<total;i++){const pip=document.createElement('div');pip.className=`gen-pip ${i<current?'done':''} ${i===current?'current':''}`;t.appendChild(pip);}
@@ -980,51 +879,11 @@ function updateTimePressure(stepsRemaining,maxSteps) {
   if(pct>=80) fill.classList.add('tp-danger'); else if(pct>=50) fill.classList.add('tp-warn');
   val.textContent=`${stepsRemaining} step${stepsRemaining!==1?'s':''} remaining`;
 }
-
-/* ── CONTAMINATION EVENTS — VISUAL CARDS ── */
 function handleContaminationEvents(events) {
   if(!events||events.length===0) return;
-  // Flash the pill
-  const pill=document.getElementById('contamPill');
-  pill.classList.add('show');
-  setTimeout(()=>pill.classList.remove('show'),4000);
-
-  const clog=document.getElementById('contamLog');
-  // Clear empty state
-  const empty=clog.querySelector('.contam-empty');
-  if(empty) empty.remove();
-
-  const now=new Date();
-  const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
-
-  for(const ev of events){
-    const msg = ev.message || JSON.stringify(ev);
-    // Try to extract source → target from message
-    const spreadMatch = msg.match(/(\w+)\s*(?:→|->|spread|infected)\s*(\w+)/i);
-    const card = document.createElement('div');
-    card.className = 'contam-event-card';
-
-    let spreadHTML = '';
-    if (spreadMatch) {
-      spreadHTML = `<div class="contam-spread-arrow">
-        <span class="contam-spread-node">${spreadMatch[1].toUpperCase()}</span>
-        <span style="padding:0 4px;color:var(--danger);">→</span>
-        <span class="contam-spread-node">${spreadMatch[2].toUpperCase()}</span>
-      </div>`;
-    }
-
-    card.innerHTML = `
-      <div class="contam-event-header">
-        <span class="contam-event-icon">🦠</span>
-        <span class="contam-event-label">Spread Detected</span>
-        <span class="contam-event-time">${time}</span>
-      </div>
-      <div class="contam-event-body">${msg}</div>
-      ${spreadHTML}
-    `;
-    clog.insertBefore(card, clog.firstChild);
-    addLog('🦠 Contamination: '+msg,'bad');
-  }
+  const pill=document.getElementById('contamPill'); pill.classList.add('show'); setTimeout(()=>pill.classList.remove('show'),3000);
+  const clog=document.getElementById('contamLog'); if(clog.textContent==='No contamination detected yet.') clog.innerHTML='';
+  for(const ev of events){const el=document.createElement('div');el.className='contam-entry';el.innerHTML=`<span>*</span><span>${ev.message||JSON.stringify(ev)}</span>`;clog.insertBefore(el,clog.firstChild);addLog('Contamination spread detected: '+(ev.message||''),'bad');}
 }
 
 /* ── AUTO RUN ── */
@@ -1107,17 +966,13 @@ function resetDashboard(){
   document.getElementById('tpFill').style.width='0%';document.getElementById('tpFill').className='tp-fill';
   document.getElementById('tpValue').textContent='— steps remaining';
   document.getElementById('contamPill').classList.remove('show');
-  document.getElementById('contamLog').innerHTML='<div class="contam-empty">No contamination detected yet.</div>';
+  document.getElementById('contamLog').textContent='No contamination detected yet.';
   for(const a of['science_model','medicine_model','legal_model']){
     document.getElementById(`badge-${a}`).textContent='Correct';document.getElementById(`badge-${a}`).className='sev-badge sev-correct';
     document.getElementById(`bar-${a}`).style.width='0%';document.getElementById(`pct-${a}`).textContent='0%';
     document.getElementById(`answer-${a}`).textContent='Awaiting first generation...';
     document.getElementById(`trend-${a}`).className='trend-chip trend-stable';document.getElementById(`trend-${a}`).textContent='Stable';
-    const card=document.getElementById(`card-${a}`);
-    card.className=card.className.replace(/\balert-\S+/g,'').replace(/\bdefective\b/g,'').trim();
-    // Hide defective banners
-    const defBanner=document.getElementById(`defect-${a}`);
-    if(defBanner) defBanner.classList.remove('show');
+    const card=document.getElementById(`card-${a}`);card.className=card.className.replace(/\balert-\S+/g,'').trim();
   }
 }
 
@@ -1150,6 +1005,7 @@ async function analyzeResponse(){
 function heuristicAnalysis(question,response){
   const words=response.toLowerCase();
   const q=question.toLowerCase();
+  // Known wrong facts
   const wrongFacts=[
     {check:()=>q.includes('speed of light')&&/[4-9]\d\d,\d\d\d|[1-9]\d{3},\d\d\d/.test(response)&&!response.includes('299'),label:'Wrong value for speed of light (correct: ~299,792 km/s)'},
     {check:()=>q.includes('speed of light')&&(response.includes('800')&&!response.includes('299')),label:'Wrong value — speed of light is 299,792 km/s, not 800,000'},
