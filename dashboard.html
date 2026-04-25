@@ -1059,13 +1059,24 @@ function buildContamChain(){
   const correct=document.getElementById('contamCorrect').value.trim();
   const wrong=document.getElementById('contamWrong').value.trim();
   if(!correct||!wrong){alert('Please fill in both fields.');return;}
-  const agents=['Science','Medicine','Legal'], domains=['science','medicine','legal'];
-  const si=domains.indexOf(contamSource), ii=(si+1)%3, pi=(si+2)%3;
+
+  const allAgents=['Science','Medicine','Legal'];
+  const domains=['science','medicine','legal'];
+
+  // Contamination spread order based on environment.py CONTAMINATION_MATRIX
+  const spreadOrder={
+    'science': ['Science','Medicine','Legal'],   // sci infects med (0.40) then legal (0.20)
+    'medicine':['Medicine','Legal','Science'],   // med infects legal (0.50) then sci (0.30)
+    'legal':   ['Legal','Science','Medicine'],   // legal infects sci (0.20) then med (0.30)
+  };
+
+  const order = spreadOrder[contamSource];
   const chain=document.getElementById('contamChain'); chain.innerHTML='';
-  agents.forEach((name,i)=>{
+
+  order.forEach((name,i)=>{
     if(i>0){const arrow=document.createElement('div');arrow.className='contam-arrow';arrow.textContent='>';chain.appendChild(arrow);}
     const node=document.createElement('div');
-    const isSrc=i===si, isInf=i===ii;
+    const isSrc=i===0, isInf=i===1;
     node.className=`contam-node ${isSrc||isInf?'infected':''}`;
     const statusLabel=isSrc?'Patient Zero — Collapsed':isInf?'Infected — Spreading':'Partially Exposed';
     const statusColor=isSrc?'var(--danger)':isInf?'var(--warn)':'var(--muted)';
@@ -1073,8 +1084,9 @@ function buildContamChain(){
     node.innerHTML=`<div class="contam-node-label">${name}</div><div style="font-size:9px;color:${statusColor};font-family:var(--font-mono);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase;">${statusLabel}</div><div style="font-size:12px;line-height:1.6;color:var(--ink2);">${text}</div>`;
     chain.appendChild(node);
   });
-  document.getElementById('contamAlert').textContent=`The ${agents[si]} model collapsed and produced fabricated content. Its outputs were mixed into the shared training pool, causing the ${agents[ii]} model to partially adopt the same errors. The watchdog detected contamination at generation 2 — one generation after patient zero. Without intervention, the ${agents[pi]} model will also be infected by generation 3.`;
-  document.getElementById('contamAction').textContent=`Immediately quarantine the ${agents[si]} model and halt its output from the shared training pool. Retrain using clean, verified data. Apply the remaining retraining budget to the ${agents[ii]} model before contamination becomes irreversible. Monitor the ${agents[pi]} model for signs of further spread.`;
+
+  document.getElementById('contamAlert').textContent=`The ${order[0]} model collapsed and produced fabricated content. Its outputs entered the shared training pool, causing the ${order[1]} model to adopt the same errors. Without intervention, the ${order[2]} model will also be infected by generation 3.`;
+  document.getElementById('contamAction').textContent=`Immediately quarantine the ${order[0]} model and halt its output from the shared training pool. Retrain using clean, verified data. Apply the remaining retraining budget to the ${order[1]} model before contamination becomes irreversible. Monitor the ${order[2]} model for signs of further spread.`;
   document.getElementById('contamResult').style.display='block';
   document.getElementById('contamResult').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
