@@ -1,3 +1,12 @@
+---
+title: CollapseNet
+emoji: 🧠
+colorFrom: red
+colorTo: yellow
+sdk: docker
+pinned: false
+---
+
 # From Bio-Math to Building AI That Watches AI
 
 *Meta PyTorch OpenEnv Hackathon × Scaler School of Technology, April 2026*
