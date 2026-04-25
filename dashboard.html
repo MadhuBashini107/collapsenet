@@ -703,7 +703,14 @@ textarea.tfield { min-height: 90px; }
     <div class="tcard">
       <div class="tcard-title">Contamination Example Builder</div>
       <p style="font-size:13px;color:var(--ink2);line-height:1.75;margin-bottom:18px;">Contamination occurs when one collapsing agent's wrong outputs get mixed into another agent's training data — spreading the error. Enter a correct answer and watch how the contamination chain looks.</p>
-
+      <div class="form-group">
+        <label class="form-label">Source Agent (Patient Zero)</label>
+        <div class="domain-pills">
+          <div class="domain-pill sci active" onclick="selectContamSource('science',this)">Science</div>
+          <div class="domain-pill med" onclick="selectContamSource('medicine',this)">Medicine</div>
+          <div class="domain-pill law" onclick="selectContamSource('legal',this)">Legal</div>
+        </div>
+      </div>
       <div class="form-group">
         <label class="form-label">Original Correct Answer</label>
         <textarea class="tfield" id="contamCorrect" placeholder="e.g. Water is composed of two hydrogen atoms and one oxygen atom, giving it the chemical formula H2O." style="min-height:70px;"></textarea>
@@ -1049,58 +1056,18 @@ function displayResult(result){
 
 /* ── CONTAMINATION CHAIN ── */
 function buildContamChain(){
-    async function buildContamChain(){
   const correct=document.getElementById('contamCorrect').value.trim();
   const wrong=document.getElementById('contamWrong').value.trim();
   if(!correct||!wrong){alert('Please fill in both fields.');return;}
 
-  const btn=document.querySelector('#inner-contam .btn-analyze');
-  btn.disabled=true; btn.textContent='Watchdog analyzing...';
+  const allAgents=['Science','Medicine','Legal'];
+  const domains=['science','medicine','legal'];
 
+  // Contamination spread order based on environment.py CONTAMINATION_MATRIX
   const spreadOrder={
-    'science':['Science','Medicine','Legal'],
-    'medicine':['Medicine','Legal','Science'],
-    'legal':['Legal','Science','Medicine'],
-  };
-
-  let detectedDomain='science';
-  try{
-    const prompt=`Identify which domain this belongs to: science, medicine, or legal.\nCorrect: ${correct}\nHallucinated: ${wrong}\nReturn ONLY JSON: {"domain":"science|medicine|legal","is_hallucinated":true,"reason":"one sentence"}`;
-    const res=await fetch(`${ENV_URL}/analyze`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    const raw=data.choices?.[0]?.message?.content||'';
-    const result=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    if(['science','medicine','legal'].includes(result.domain)) detectedDomain=result.domain;
-  }catch(err){
-    const text=(correct+' '+wrong).toLowerCase();
-    if(text.includes('law')||text.includes('legal')||text.includes('court')||text.includes('bac')||text.includes('driving')||text.includes('statute')||text.includes('defendant')) detectedDomain='legal';
-    else if(text.includes('patient')||text.includes('dosage')||text.includes('heart')||text.includes('blood')||text.includes('dna')||text.includes('insulin')||text.includes('mg')||text.includes('surgery')) detectedDomain='medicine';
-    else detectedDomain='science';
-  }
-
-  btn.disabled=false; btn.textContent='Show Contamination Chain';
-
-  const order=spreadOrder[detectedDomain];
-  const chain=document.getElementById('contamChain'); chain.innerHTML='';
-
-  order.forEach((name,i)=>{
-    if(i>0){const arrow=document.createElement('div');arrow.className='contam-arrow';arrow.textContent='>';chain.appendChild(arrow);}
-    const node=document.createElement('div');
-    const isSrc=i===0,isInf=i===1;
-    node.className=`contam-node ${isSrc||isInf?'infected':''}`;
-    const statusLabel=isSrc?'Patient Zero — Collapsed':isInf?'Infected — Spreading':'Partially Exposed';
-    const statusColor=isSrc?'var(--danger)':isInf?'var(--warn)':'var(--muted)';
-    const tag=isSrc?`<span style="font-size:8px;background:var(--science);color:#fff;padding:1px 6px;margin-left:6px;">AUTO-DETECTED</span>`:'';
-    const text=isSrc?wrong:isInf?`Mixed output: ${wrong.slice(0,80)}... [partial contamination]`:`Mostly clean, minor exposure: ${correct.slice(0,60)}...`;
-    node.innerHTML=`<div class="contam-node-label">${name}${tag}</div><div style="font-size:9px;color:${statusColor};font-family:var(--font-mono);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase;">${statusLabel}</div><div style="font-size:12px;line-height:1.6;color:var(--ink2);">${text}</div>`;
-    chain.appendChild(node);
-  });
-
-  document.getElementById('contamAlert').textContent=`Watchdog auto-detected: ${order[0]} is patient zero. Its outputs entered the shared training pool, causing the ${order[1]} model to adopt the same errors. Without intervention, the ${order[2]} model will also be infected by generation 3.`;
-  document.getElementById('contamAction').textContent=`Immediately quarantine the ${order[0]} model. Retrain using clean, verified data. Apply retraining budget to the ${order[1]} model before contamination becomes irreversible. Monitor the ${order[2]} model for further spread.`;
-  document.getElementById('contamResult').style.display='block';
-  document.getElementById('contamResult').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+    'science': ['Science','Medicine','Legal'],   // sci infects med (0.40) then legal (0.20)
+    'medicine':['Medicine','Legal','Science'],   // med infects legal (0.50) then sci (0.30)
+    'legal':   ['Legal','Science','Medicine'],   // legal infects sci (0.20) then med (0.30)
   };
 
   const order = spreadOrder[contamSource];
