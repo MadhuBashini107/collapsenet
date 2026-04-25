@@ -35,7 +35,8 @@ So I built CollapseNet , an environment where three AI agents, covering science,
 
 I trained the watchdog using GRPO directly on this environment. The reward went from 0.90 to 0.989 over 17 steps. 
 
-![image](https://cdn-uploads.huggingface.co/production/uploads/69d1fea67ccb13fe3cdb94e2/K6mEUHeTGDXHmym04ZReM.png)
+
+![image](https://cdn-uploads.huggingface.co/production/uploads/69d1fea67ccb13fe3cdb94e2/AMjK0VqBw4q0ckHLJ9hcK.png)
 
 It learned to find patient zero. It learned to act before the spread became irreversible.
 
