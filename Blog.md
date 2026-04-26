@@ -72,6 +72,8 @@ But I had something better than a background — I had two years of knowing exac
 
 **Live environment:** https://huggingface.co/spaces/madhuuuu10/collapsenet
 
+
 **Dashboard:** https://madhuuuu10-collapsenet.hf.space/dashboard
+
 
 **Trained model:** https://huggingface.co/madhuuuu10/collapsenet-watchdog
