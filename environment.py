@@ -674,7 +674,7 @@ class CollapseNetEnv:
 
             score += min(exp_score, 0.15)
 
-        difficulty_cap = {"easy": 0.899, "medium": 0.799, "hard": 0.549}
+        difficulty_cap = {"easy": 0.899, "medium": 0.699, "hard": 0.459}
         cap = difficulty_cap.get(self.difficulty, 0.999)
         return round(max(0.001, min(0.999, score)), 4)
 
