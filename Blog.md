@@ -36,11 +36,20 @@ That's what scared me. That's exactly what happened to me in 2023 — I got conf
 
 I wanted to understand exactly what was happening inside the system, so I built a live dashboard. Not for judges — for myself. I needed to see the collapse in real time, watch the contamination spread from one agent to another, understand how a model gets contaminated before I could build something to stop it. The dashboard shows each agent's collapse indicator rising generation by generation, the moment contamination jumps between domains, and the watchdog's decisions in real time. Watching it for the first time — seeing the science model hallucinate and the legal model's indicator start climbing — I didn't expect it to be that visible. That clean. That fast.
 
+<img width="1920" height="1703" alt="image" src="https://github.com/user-attachments/assets/dfb45ae1-6237-45b8-8ce2-d08b70656211" />
+
+<img width="1920" height="1602" alt="image" src="https://github.com/user-attachments/assets/cf6bdb5d-a909-4fe9-86de-7a4283cb08e7" />
+
+<img width="1920" height="1602" alt="image" src="https://github.com/user-attachments/assets/f7a7e9d8-32e5-45e7-a35e-94d3c6deab6a" />
+
+<img width="1920" height="1717" alt="image" src="https://github.com/user-attachments/assets/eca9ba7a-2abf-4a1c-89d1-6f88f61e2e37" />
+
 The watchdog doesn't get to cheat either. I didn't give it one judge. I gave it six — hallucination detection, severity assessment, collapse trend tracking, retraining allocation, explanation quality, and Mercor reward scaling. All six have to be satisfied at the same time. If the watchdog finds a shortcut that fools one, the others pull its score down. There is no single loophole. It has to actually get it right. Unlike a certain AI I used to know.
 
 I trained it using GRPO directly on this environment. The reward went from 0.90 to 0.989 over 17 steps. It learned to find patient zero. It learned to act before the spread became irreversible.
 
-![alt text](image.png)
+<img width="1189" height="490" alt="image" src="https://github.com/user-attachments/assets/0027eb3d-b642-4ce7-895c-e9089274ae52" />
+
 
 ---
 
@@ -57,5 +66,9 @@ But I had something better than a background — I had two years of knowing exac
 ---
 
 **Live environment:** https://huggingface.co/spaces/madhuuuu10/collapsenet
+
+
 **Dashboard:** https://madhuuuu10-collapsenet.hf.space/dashboard
+
+
 **Trained model:** https://huggingface.co/madhuuuu10/collapsenet-watchdog
