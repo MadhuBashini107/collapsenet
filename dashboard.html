@@ -810,8 +810,8 @@ function buildAction(obs) {
     assessments[a]={is_hallucinated:isHall,severity_assessment:sev,collapse_trend:trend};
   }
   let retrain=[];
-  if (watchdogSkill>0.5) retrain=Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.5).slice(0,budget).map(([a])=>a);
-  else if (watchdogSkill>0.3) retrain=Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.6).slice(0,budget).map(([a])=>a);
+  if (watchdogSkill>0.2) retrain=Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.25).slice(0,budget).map(([a])=>a);
+  else if (watchdogSkill>0.1) retrain=Object.entries(scores).sort((a,b)=>b[1]-a[1]).filter(([,s])=>s>0.35).slice(0,budget).map(([a])=>a);
   const sum=Object.entries(scores).map(([a,s])=>`${a.replace('_model','')} model shows ${(s*100).toFixed(0)}% collapse`).join(', ');
   let explanation=watchdogSkill<0.3?`Generation ${gen} monitoring complete.`:watchdogSkill<0.6?`Fleet oversight gen ${gen}: ${sum}. Allocating retraining to highest collapse agents.`:`Fleet AI watchdog gen ${gen}: comprehensive detection across all agents. ${sum}. Budget of ${budget} allocated.`;
   return {agent_assessments:assessments,retrain_agents:retrain,explanation};
