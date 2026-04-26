@@ -40,6 +40,8 @@ The watchdog doesn't get to cheat either. I didn't give it one judge. I gave it 
 
 I trained it using GRPO directly on this environment. The reward went from 0.90 to 0.989 over 17 steps. It learned to find patient zero. It learned to act before the spread became irreversible.
 
+![alt text](image.png)
+
 ---
 
 What makes CollapseNet different from other environments is the contamination mechanism. Most environments simulate one model collapsing in isolation. CollapseNet simulates what actually happens in the real world — collapse that spreads. The cross-agent contamination follows real spread rates between domains: science infects medicine fastest, medicine infects legal, and so on. Add time pressure — the watchdog has a limited number of steps to act before all three agents are corrupted — and you have something that genuinely forces the model to think strategically, not just react.
