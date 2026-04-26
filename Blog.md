@@ -36,11 +36,25 @@ That's what scared me. That's exactly what happened to me in 2023 — I got conf
 
 I wanted to understand exactly what was happening inside the system, so I built a live dashboard. Not for judges — for myself. I needed to see the collapse in real time, watch the contamination spread from one agent to another, understand how a model gets contaminated before I could build something to stop it. The dashboard shows each agent's collapse indicator rising generation by generation, the moment contamination jumps between domains, and the watchdog's decisions in real time. Watching it for the first time — seeing the science model hallucinate and the legal model's indicator start climbing — I didn't expect it to be that visible. That clean. That fast.
 
+
+![screencapture-madhuuuu10-collapsenet-hf-space-dashboard-2026-04-26-08_53_57](https://cdn-uploads.huggingface.co/production/uploads/69d1fea67ccb13fe3cdb94e2/0iDxnYF0-x8Oz5IGHSzmm.png)
+
+
+![screencapture-madhuuuu10-collapsenet-hf-space-dashboard-2026-04-26-08_55_12](https://cdn-uploads.huggingface.co/production/uploads/69d1fea67ccb13fe3cdb94e2/uc_zgCjYJoEJW4kRHFPLH.png)
+
+
+![screencapture-madhuuuu10-collapsenet-hf-space-dashboard-2026-04-26-08_55_44](https://cdn-uploads.huggingface.co/production/uploads/69d1fea67ccb13fe3cdb94e2/kqUla4qt2hT2hT9mC2tPR.png)
+
+
+![screencapture-madhuuuu10-collapsenet-hf-space-dashboard-2026-04-26-08_56_59](https://cdn-uploads.huggingface.co/production/uploads/69d1fea67ccb13fe3cdb94e2/YrZvVxOoYKC1hNmcRI9jc.png)
+
 The watchdog doesn't get to cheat either. I didn't give it one judge. I gave it six — hallucination detection, severity assessment, collapse trend tracking, retraining allocation, explanation quality, and Mercor reward scaling. All six have to be satisfied at the same time. If the watchdog finds a shortcut that fools one, the others pull its score down. There is no single loophole. It has to actually get it right. Unlike a certain AI I used to know.
 
 I trained it using GRPO directly on this environment. The reward went from 0.90 to 0.989 over 17 steps. It learned to find patient zero. It learned to act before the spread became irreversible.
 
-![alt text](image.png)
+
+
+![image](https://cdn-uploads.huggingface.co/production/uploads/69d1fea67ccb13fe3cdb94e2/ouu-fDE9fs0bejnRS0aZs.png)
 
 ---
 
@@ -57,5 +71,9 @@ But I had something better than a background — I had two years of knowing exac
 ---
 
 **Live environment:** https://huggingface.co/spaces/madhuuuu10/collapsenet
+
+
 **Dashboard:** https://madhuuuu10-collapsenet.hf.space/dashboard
+
+
 **Trained model:** https://huggingface.co/madhuuuu10/collapsenet-watchdog
