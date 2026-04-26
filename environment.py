@@ -366,6 +366,15 @@ class CollapseNetEnv:
         if self.current_generation >= self.config["generations"] or self.step_count >= max_steps:
             self.done = True
 
+        recovery_log = []
+        for entry in self.retraining_log:
+            if entry["generation"] == self.current_generation:
+                agent_name = entry["agent"].replace("_model", "").capitalize()
+                recovery_log.append({
+                    "event": "RECOVERED",
+                    "message": f"{agent_name} model retrained and recovered at generation {entry['generation']}",
+                })
+
         obs = self._build_observation() if not self.done else self._build_summary()
         return {
             "observation": obs,
@@ -375,8 +384,8 @@ class CollapseNetEnv:
             "steps_remaining": max(0, max_steps - self.step_count),
             "generation": self.current_generation,
             "fleet_status": self._fleet_status(),
-            # v3: expose contamination events for dashboard
             "contamination_events": spread_events,
+            "recovery_log": recovery_log,
         }
 
     # ─────────────────────────────────────────
